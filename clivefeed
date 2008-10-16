@@ -1,0 +1,681 @@
+#!/usr/bin/env perl
+# -*- coding: ascii -*-
+###########################################################################
+# clivefeed, the feed parsing utility for clive
+# Copyright (C) 2008 Toni Gundogdu.
+#
+# This file is part of clive-utils.
+#
+# clivefeed is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# clivefeed is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with clivefeed.  If not, see <http://www.gnu.org/licenses/>.
+###########################################################################
+
+# Keep it simple.
+
+use warnings;
+use strict;
+
+binmode(STDOUT, ":utf8");
+
+use XML::RSS::LibXML;
+use WWW::Curl::Easy;
+use Tk::FontDialog;
+use Tk::DialogBox;
+use Config::Tiny;
+use HTML::Strip;
+use Tk::Tree;
+use Tk;
+
+# Core modules:
+use Getopt::Long qw(:config bundling);
+use Digest::SHA qw(sha1_hex);
+use File::Spec;
+use File::Find;
+use File::Path;
+use Pod::Usage;
+use Encode;
+use Cwd;
+
+# Non-essentials
+my %opted_mods = (Clipboard => 1);
+eval "use Clipboard"; $opted_mods{Clipboard}=0 if $@;
+
+my $VERSION     = "2.0beta1";
+my $CONFIGDIR   = $ENV{CLIVEFEED_CONFIGDIR}
+    ? $ENV{CLIVEFEED_CONFIGDIR}
+    : File::Spec->catfile($ENV{HOME}, ".config/clivefeed");
+my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
+my $PREFSFILE   = File::Spec->catfile($CONFIGDIR, "prefs");
+
+my %opts;       # Holds the options
+my @queue;      # Holds the current URL queue
+my $curl;       # Holds the curl handle (reused throught lifespan)
+my @channels;   # Holds parsed channel data
+my $mw;         # Holds the main window handle (GUI)
+my $pwmain;     # Holds the handle to the main paned window
+my $pwtop;      # Holds the handle to the top paned window
+my $pwbottom;   # Holds the handle to the bottom paned window
+my $lbchann;    # Listbox: channels
+my $lbitems;    # Listbox: (channel) items
+my $lbqueue;    # Listbox: queued video items
+my $txtdescr;   # Text: video description
+my %usersel;    # Holds user-selected videos
+
+# Parse config
+my $conf = Config::Tiny->read($CONFIGFILE);
+my $prefs = Config::Tiny->read($PREFSFILE);
+%opts = (
+    clive   => $conf->{clive}->{path},
+    opts    => $conf->{clive}->{opts},
+    agent   => $conf->{http}->{agent},
+    proxy   => $conf->{http}->{proxy},
+
+    geometry=> $prefs->{gui}->{geometry},
+    pwmain  => $prefs->{gui}->{pwmain},
+    pwtop   => $prefs->{gui}->{pwtop},
+    pwbottom=> $prefs->{gui}->{pwbottom},
+    mainfont=> $prefs->{gui}->{mainfont},
+);
+
+# Parse cmdline
+# Define those not read from config, init with defaults
+$opts{quiet}    = 0;
+$opts{paste}    = 0;
+$opts{all}      = 0;
+$opts{debug}    = 0;
+$opts{help}     = 0;
+$opts{manual}   = 0;
+$opts{version}  = 0;
+$opts{mainfont} = "{helvetica} -12 bold" unless $opts{mainfont};
+
+GetOptions(\%opts,
+    'debug|d', 'help|h',  'manual|m',  'version|v',  'all|a',
+    'paste|x', 'quiet|q', 'clive|c=s', 'opts|o=s',
+    # Workaround since '$longopt|shortopt' is a no-no.
+    'noproxy|X' => sub { $opts{proxy} = ""; },
+) or pod2usage(1);
+
+# Since 'version|v' => \&print_version and exit cannot tango with tk
+print_version(0) if $opts{version}; 
+pod2usage(-exitstatus => 0, -verbose => 1) if $opts{help};
+pod2usage(-exitstatus => 0, -verbose => 2) if $opts{manual};
+
+$opts{clive} = $ENV{CLIVE_PATH} unless $opts{clive};
+find_clive() unless $opts{clive};
+
+#init_gui(); exit;
+
+get_queue();
+
+select STDERR; $| = 1; # Go unbuffered
+select STDOUT; $| = 1;
+
+process_queue();
+
+unless ( $opts{all} ) { init_gui(); } 
+else                  { grab_all(); }
+
+
+## Subroutines: Connection
+
+sub init_curl {
+    $curl = WWW::Curl::Easy->new;
+
+    $curl->setopt(CURLOPT_USERAGENT,
+        $opts{agent} ? $opts{agent} : "Mozilla/5.0");
+
+    $curl->setopt(CURLOPT_PROXY, $opts{proxy}) if defined $opts{proxy};
+    $curl->setopt(CURLOPT_VERBOSE, 1) if $opts{debug};
+    $curl->setopt(CURLOPT_FOLLOWLOCATION, 1);
+    $curl->setopt(CURLOPT_AUTOREFERER, 1);
+    $curl->setopt(CURLOPT_HEADER, 0);
+    $curl->setopt(CURLOPT_NOBODY, 0);
+}
+
+sub fetch_feed {
+    my ($url, $response, $rc) = (shift, "", 0);
+    open my $rfh, ">", \$response;
+
+    print "Fetching $url ..." unless $opts{quiet};
+    $curl->setopt(CURLOPT_URL, $url);
+    $curl->setopt(CURLOPT_ENCODING, "");
+    $curl->setopt(CURLOPT_WRITEDATA, $rfh);
+    $rc = $curl->perform;
+    $rc = $curl->getinfo(CURLINFO_RESPONSE_CODE);
+
+    if ( $rc == 200 ) {
+        print "done.\n";
+        process_feed($url, $response);
+    } else {
+        print STDERR "\nerror: " .$curl->strerror($rc)." (http/$rc)\n";
+    }
+    close $rfh;
+}
+
+
+## Subroutines: Queue
+
+sub get_queue {
+    if ( $opts{paste} ) {
+        print STDERR "error: Clipboard module not found" and exit
+            unless $opted_mods{Clipboard};
+        my $data = Clipboard->paste();
+        if ( $data ) {
+            parse_input($_) foreach split/\n/,$data;
+        }
+    }
+
+    parse_input($_) foreach @ARGV;
+    unless ( @queue ) { parse_input($_) while ( <STDIN> ); }
+
+    my %h = map {$_,1} @queue; # Remove duplicates
+    @queue = keys %h;
+}
+
+sub process_queue {
+    init_curl();
+    fetch_feed($_) foreach (@queue);
+}
+
+sub process_feed {
+    my ($url, $response) = @_;
+    print "=> Processing feed ..." unless $opts{quiet};
+
+    my $rss = XML::RSS::LibXML->new;
+    $rss->parse($response);
+    push @channels, $rss;
+
+    print "done.\n" unless $opts{quiet};
+}
+
+sub grab_all {
+    my @q;
+    foreach my $rss ( @channels ) {
+        foreach my $item ( @{$rss->{items}} ) {
+            push @q, $item->{link};
+        }
+    }
+    run_clive(@q);
+}
+
+
+## Subroutines: Helpers
+
+sub parse_input {
+    my $url = shift;
+
+    return if $url =~ /^$/;
+    chomp $url;
+
+    $url = "http://$url" if $url !~ m!^http://!i;
+    push @queue, $url;
+}
+
+sub find_clive {
+    print "Trying to locate 'clive' ...";
+
+    find ( sub { $opts{clive} = $File::Find::name if ( $_ eq 'clive' ) },
+        split /:/, $ENV{PATH} || getcwd);
+
+    if   ( $opts{clive} ) { print "$opts{clive}\n"; }
+    else { print STDERR "error: not found, use --clive=path\n"; exit; }
+}
+
+sub run_clive {
+    my (@q) = @_;
+    system "$opts{clive} $opts{opts} " . join(' ', @q);
+}
+
+sub print_version {
+    my $noexit  = shift;
+    my $perl_v  = sprintf "%vd", $^V;
+    my $clipb_v = $opted_mods{Clipboard} ? $Clipboard::VERSION : "-";
+    my $s       = sprintf
+"clivefeed version $VERSION.  Copyright (C) 2008 Toni Gundogdu.
+
+Perl: $perl_v ($^O)
+Modules:
+  * Config::Tiny/$Config::Tiny::VERSION\t\t* WWW::Curl/$WWW::Curl::VERSION
+  * XML::RSS::LibXML/$XML::RSS::LibXML::VERSION\t* Clipboard/$clipb_v
+  * Tk/$Tk::VERSION\t\t\t* Tk::Tree/$Tk::Tree::VERSION
+  * Tk::DialogBox/$Tk::DialogBox::VERSION\t\t* HTML::Strip/$HTML::Strip::VERSION
+Core modules:
+  * Getopt::Long/$Getopt::Long::VERSION\t\t* Digest::SHA/$Digest::SHA::VERSION
+  * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
+  * File::Path/$File::Path::VERSION\t\t* Encode/$Encode::VERSION
+  * Pod::Usage/$Pod::Usage::VERSION\t\t* Cwd/$Cwd::VERSION
+
+This program comes with ABSOLUTELY NO WARRANTY. You may redistribute copies of
+clive under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your option)
+any later version. You should have received a copy of the General Public License
+along with this program. If not, see http://www.gnu.org/licenses/.
+";
+return $s if $noexit;
+print $s; exit;
+}
+
+
+# GUI:
+
+sub init_gui {
+    $mw = MainWindow->new;
+    $mw->geometry($opts{geometry}) if defined $opts{geometry};
+    $mw->title('clivefeed');
+    $mw->protocol('WM_DELETE_WINDOW', sub { save_prefs(); $mw->destroy } );
+
+    # Menubar
+    my $mb = $mw->Menu;
+    $mw->configure(-menu => $mb);
+
+    # Menu: File
+    my $file = $mb->cascade(-label => 'File', -underline => 0, -tearoff => 0);
+    $file->command(-label => 'Extract videos in queue...',
+        -underline => 0, -command =>  \&on_extract);
+    $file->separator;
+    $file->command(-label => 'Quit', -underline => 0, -command => sub {exit});
+
+    # Menu: Edit
+    my $edit = $mb->cascade(-label => 'Edit', -underline => 0, -tearoff => 0);
+    $edit->command(-label => 'Preferences...',
+        -underline => 0, -command => \&on_prefs);
+
+    # Menu: Help
+    my $help = $mb->cascade(-label => 'Help', -underline => 0, -tearoff => 0);
+    $help->command(-label => 'About...',
+        -underline => 0, -command => \&on_about);
+
+    # The GUI has an upper and a lower part
+    $pwmain = $mw->Panedwindow(-orient => 'v', -opaqueresize => 0);
+
+    # Upper part
+    $pwtop = $pwmain->Panedwindow(-orient => 'h', -opaqueresize => 0);
+
+    # Upper: Channels
+    my $lbar = $pwtop->Frame;
+
+    $lbchann = $lbar->Scrolled('Tree',
+        -scrollbars => 'osoe',
+        -itemtype   => 'text',
+        -selectmode => 'extended',
+        -browsecmd  => \&on_chann,
+        -indicator  => 1,
+        -drawbranch => 1,
+    )->pack(-side => 'top', -expand => 1, -fill => 'both');
+
+    foreach my $rss ( @channels ) {
+        my $chann = $rss->{channel}->{title};
+        $chann =~ tr{.}{}d;
+
+        $lbchann->add($chann);
+        $lbchann->itemCreate($chann, 0, -text => $chann, -itemtype => 'text');
+
+        foreach my $item ( @{$rss->{items}} ) {
+            my $title = $item->{title};
+            $title =~ tr{.}{}d;
+            my $path = "$chann.$title";
+
+            $lbchann->add($path, -data => $item);
+            $lbchann->itemCreate($path, 0,
+                -text => $item->{title}, -itemtype => 'text');
+        }
+    }
+    $lbchann->autosetmode;
+    $lbchann->close($_) foreach ( $lbchann->infoChildren('') );
+
+    $lbar->Button(-text => 'Grab video', -command => \&on_grab
+    )->pack(-fill => 'x', -side => 'left');
+    $lbar->Button(-text => 'Grab channel', -command => \&on_grab_chann
+    )->pack(-fill => 'x', -side => 'left');
+    $lbar->Button(-text => 'Grab everything', -command => \&on_grab_all
+    )->pack(-fill => 'x', -side => 'left');
+
+    my $rbar = $pwtop->Frame;
+    $txtdescr = $rbar->Scrolled('Text', -scrollbars => 'osoe',
+        )->pack(-fill => 'both', -expand => 1);
+
+    $pwtop->add($lbar, $rbar, -width => $opts{pwtop} ? $opts{pwtop}:200);
+
+    # Lower part
+    $pwbottom = $pwmain->Panedwindow(-orient => 'h', -opaqueresize => 0);
+
+    $lbqueue = $pwbottom->Scrolled('Tree',
+        -scrollbars => 'osoe',
+        -itemtype   => 'text',
+        -selectmode => 'extended',
+        -browsecmd  => \&on_queue,
+        -indicator  => 1,
+        -drawbranch => 1,
+    );
+
+    my $bar = $pwbottom->Frame; # Button toorbar
+    $bar->Button(-text => 'Remove', -command=> \&on_remove,
+    )->pack(-fill => 'x');
+
+    $bar->Button(-text => 'Clear', -command=> \&on_clear,
+    )->pack(-fill => 'x');
+
+    $bar->Button(-text => 'Extract videos...', -command=> \&on_extract,
+    )->pack(-fill => 'x', -side => 'bottom');
+
+    $pwbottom->add($lbqueue, $bar,
+        -width => $opts{pwbottom} ? $opts{pwbottom} : 200);
+
+    # Add upper and lower parts to main paned window
+    $pwmain->add($pwtop, $pwbottom,
+        -height => $opts{pwmain} ? $opts{pwmain} : 200);
+
+    $mw->RefontTree(-font => $opts{mainfont});
+    $pwmain->pack(-expand => 1, -fill => 'both');
+
+    MainLoop;
+}
+
+sub set_descr {
+    my ($lb, $path) = @_;
+
+    $txtdescr->delete('1.0', 'end');
+
+    my $item = $lb->infoData($path);
+    return unless defined $item;
+
+    my $strip = HTML::Strip->new;
+    my $descr = $strip->parse($item->{description});
+    $descr =~ s/^\s+|\s+$//g;
+
+    $txtdescr->insert('end', $descr);
+}
+
+sub on_chann {
+    set_descr($lbchann, shift);
+}
+
+sub on_queue {
+    set_descr($lbqueue, shift);
+}
+
+sub queue_item {
+    my $path = shift;
+    return if $path !~ /\./;
+    return if $lbqueue->infoExists($path);
+
+    my $item = $lbchann->infoData($path);
+    my ($chann) = split /\./, $path;
+    
+    unless ( $lbqueue->infoExists($chann) ) {
+        $lbqueue->add($chann);
+        $lbqueue->itemCreate($chann, 0,
+            -text => $chann, -itemtype => 'text');
+    }
+
+    $lbqueue->add($path, -data => $item);
+    $lbqueue->itemCreate($path, 0,
+        -text => $item->{title}, -itemtype => 'text');
+}
+
+sub on_grab {
+    queue_item($_) foreach ( $lbchann->infoSelection );
+    $lbqueue->autosetmode;
+}
+
+sub on_grab_chann {
+    foreach ( $lbchann->infoSelection ) {
+        my ($parent) = split /\./;
+        queue_item($_)
+            foreach ( $lbchann->infoChildren($parent) );
+    }        
+    $lbqueue->autosetmode;
+}
+
+sub on_grab_all {
+    foreach ( $lbchann->infoChildren("") ) {
+        my ($parent) = split /\./;
+        queue_item($_)
+            foreach ($lbchann->infoChildren($parent) );
+    }
+    $lbqueue->autosetmode;
+}
+
+sub on_remove {
+    $lbqueue->deleteEntry($_)
+        foreach ( $lbqueue->infoSelection );
+}
+
+sub on_clear {
+    $lbqueue->deleteAll;
+}
+
+sub on_about {
+    my $dlg = $mw->DialogBox(-title => 'About', -buttons => ['OK']);
+    my $txt = $dlg->add('Text')->pack;
+    $txt->insert('end', print_version(1));
+    $dlg->Show;
+}
+
+sub change_font {
+    my ($top, $lblv, $lbl) = @_;
+    my $font = $top->FontDialog(-initfont => $$lblv)->Show;
+
+    if ( defined $font ) {
+        my $descr = $top->FontDialog->GetDescriptiveFontName($font);
+        $lbl->configure(-font => $descr);
+        $$lblv =  $descr;
+    }
+}
+
+sub on_prefs {
+    my $dlg = $mw->DialogBox(-title => 'clivefeed preferences',
+        -buttons => ['OK','Cancel']);
+
+    $dlg->add('Label', -text => 'Fonts: press to choose'
+    )->grid(-sticky => 'w', -pady => 10);
+
+    my ($mainfont) = ($opts{mainfont});
+    my $mainfontl = $dlg->Label(-textvariable => \$mainfont);
+
+    $dlg->add('Button', -text => 'Main font',
+        -command => sub { change_font_descr($dlg, \$mainfont, $mainfontl) }
+    )->grid($mainfontl, -sticky => 'w', -padx => '5');
+
+    on_prefs_ok($mainfont) if $dlg->Show eq 'OK';
+}
+
+sub on_prefs_ok {
+    ($opts{mainfont}) = @_;
+    $mw->RefontTree(-font => $opts{mainfont});
+    save_prefs();
+}
+
+sub save_prefs {
+    mkpath( [$CONFIGDIR], 1, 0700);
+
+    my $c = Config::Tiny->new;
+    $c->{gui}->{geometry} = $mw->geometry();
+
+    # FIXME: +7 is added to the coords even if the sashes have not been
+    # dragged. Unsure why. The increase is probably system specific.
+    $c->{gui}->{pwmain}   = ($pwmain->sashCoord(0))[1]-7;
+    $c->{gui}->{pwtop}    = ($pwtop->sashCoord(0))[0]-7;
+    $c->{gui}->{pwbottom} = ($pwbottom->sashCoord(0))[0]-7;
+    $c->{gui}->{mainfont} = $opts{mainfont};
+
+    $c->write($PREFSFILE);
+}
+
+sub on_extract {
+    my @q;
+    foreach ( $lbqueue->infoChildren('') ) {
+        foreach ( $lbqueue->infoChildren($_) ) {
+            my $item = $lbqueue->infoData($_);
+            push @q, $item->{link};
+        }
+    }
+    return unless @q;
+
+    # Prompt for clive(1) options
+    my $dlg = $mw->DialogBox(-title => 'clive(1) options',
+        -buttons => ['OK','Cancel']);
+
+    $dlg->add('Label', -text => 'Path to clive'
+    )->grid(my $clivepath = $dlg->Entry(-width => 25),
+        -sticky => 'w', -padx => '5');
+
+    $dlg->add('Label', -text => 'Runtime options'
+    )->grid(my $cliveopts = $dlg->Entry(-width => 25),
+        -sticky => 'w', -padx => '5');
+
+    $clivepath->insert('end', $opts{clive});
+    $cliveopts->insert('end', $opts{opts});
+
+    if ( $dlg->Show() eq 'OK' ) {
+        $opts{clive} = $clivepath->get;
+        $opts{opts}  = $cliveopts->get;
+        $mw->destroy;
+        run_clive(@q);
+    }
+}
+
+
+__END__
+
+=head1 NAME
+
+clivefeed - the feed parsing utility for clive
+
+=head1 SYNOPSIS
+
+clivefeed [option]... [URL]...
+
+=head1 DESCRIPTION
+
+clivefeed is an utility that parses RSS feeds containing video page links and
+uses L<clive(1)> to extract them.
+
+Historically, the feed parsing feature was written in Python/Newt and it was
+part of the clive 1.x project. The clivefeed utility was written in Perl/Tk to
+replace the feature that was removed in clive 2.0. The clivefeed utility is
+part of the B<clive-utils> project.
+
+=head1 OPTIONS
+
+You may freely specify options after the command-line arguments. For example:
+
+    clivefeed -a URL --opts=--noextract
+
+=over 4
+
+=item B<-h --help>
+
+Show help and exit.
+
+=item B<--version>
+
+Show version and exit.
+
+=item B<--clive=>I<path>
+
+I<path> to L<clive(1)> command. If unspecified, clivefeed will attempt to
+locate it in the $PATH. Additionally, the B<CLIVE_PATH> environment variable
+can be used. See also L</CONFIG>. 
+
+=item B<--opts=>I<opts>
+
+I<opts> to append to clive call. See L<clive(1)> for more on the available
+options.
+
+=item B<-a --all>
+
+Grab all videos without prompting the GUI.
+
+=back
+
+=head1 EXAMPLES
+
+=over 4
+
+=item clivefeed "http://youtube.com/rss/user/communitychannel/videos.rss"
+
+Parses the feed at the specified URL.
+
+=item cat E<gt>E<gt> url.lst
+
+http://youtube.com/rss/user/googletechtalks/videos.rss
+http://youtube.com/rss/user/theonion/videos.rss
+http://youtube.com/rss/user/lisanova/videos.rss
+http://youtube.com/rss/user/clipcritics/videos.rss
+http://youtube.com/rss/user/communitychannel/videos.rss
+http://youtube.com/rss/user/manintheboxshow/videos.rss
+
+=item cat url.lst | clivefeed
+
+Reads input from UNIX pipe.
+
+=item clivefeed --opts="-f mp4"
+
+Append the I<opts> to the L<clive(1)> call.
+
+=item clivefeed --all URL
+
+Grabs all found videos without prompting.
+
+=back
+
+=head1 FILES
+
+By default, clivefeed searches the ~/.config/clivefeed directory for the
+config file. The B<CLIVEFEED_CONFIGDIR> environment variable can be used
+to override this behaviour.
+
+=over 4
+
+=item ~/.config/clivefeed/config
+
+Configuration file.
+
+=item ~/.config/clivefeed/prefs
+
+GUI preferences (e.g. fonts, window position, sash coords, ...).
+
+=back
+
+=head1 CONFIG
+
+    ## Example config file for clivefeed.
+
+    [clive]
+        path = /usr/local/bin/clive
+        opts = -f mp4
+
+    [http]
+        agent = Mozilla/5.0
+        proxy = http://foo:1234
+
+=head1 SEE ALSO
+
+L<clive(1)>
+
+=head1 OTHER
+
+Project: http://googlecode.com/p/clive-utils/
+
+A clive-utils development repository can be obtained from:
+
+    git clone git://repo.or.cz/clive-utils.git
+
+Patches welcome.
+
+=head1 AUTHOR
+
+Written by Toni Gundogdu <legatvs@gmail.com>
+
+=cut

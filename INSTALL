@@ -1,0 +1,36 @@
+Prerequisites
+------------------------------------------------------------------------------
+
+clive >= 2.0beta1
+  http://clive.sf.net
+
+Perl >= 5.8
+  with the following (recommended) module versions:
+
+    * Config::Tiny/2.12           * WWW::Curl/4.05
+    * XML::RSS::LibXML/0.3002     * Clipboard/0.09
+    * Tk/804.027                  * Tk::Tree/4.005
+    * Tk::DialogBox/4.013         * HTML::Strip/1.06
+
+    * Getopt::Long/2.35           * Digest::SHA/5.47
+    * File::Spec/3.12             * File::Find/1.10
+    * File::Path/1.08             * Encode/2.12
+    * Pod::Usage/1.33             * Cwd/3.12
+
+Note that the Clipboard module is OPTIONAL.
+
+
+Installation
+------------------------------------------------------------------------------
+
+Extract:
+    % tar xvjf clive-utils-$release.tar.bz2 && cd clive-utils-$release
+
+Run:
+    # If the path to clive(1) is not specified (e.g. --clive=path), the
+    # clive-utils programs try to locate it in the $PATH.
+
+    % clivefeed [option]... [URL]...
+
+Getting started:
+    % clivefeed --manual
