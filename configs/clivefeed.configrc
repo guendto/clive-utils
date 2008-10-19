@@ -1,0 +1,10 @@
+## An example config file for clivefeed.
+## Default location: ~/.config/clivefeed/config
+
+[clive]
+    #path = /path/to/clive
+    #opts = -f mp4
+
+[http]
+    #agent = Mozilla/5.0
+    #proxy = http://foo:1234
