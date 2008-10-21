@@ -100,7 +100,7 @@ $opts{mainfont} = "{helvetica} -12 bold" unless $opts{mainfont};
 
 GetOptions(\%opts,
     'debug|d', 'help|h',  'manual|m',  'version|v',  'all|a',
-    'paste|x', 'quiet|q', 'clive|c=s', 'opts|o=s',
+    'paste|x', 'quiet|q', 'clive|c=s', 'opts|o=s',   'agent|U=s',
     # Workaround since '$longopt|shortopt' is a no-no.
     'noproxy|X' => sub { $opts{proxy} = ""; },
 ) or pod2usage(1);
@@ -596,6 +596,16 @@ options.
 =item B<-a --all>
 
 Grab all videos without prompting the GUI.
+
+=back
+
+B<HTTP Options>
+
+=over 4
+
+=item B<-U --agent=>I<string>
+
+Identify as I<string> to the HTTP server. Defaults to "Mozilla/5.0".
 
 =back
 
