@@ -270,6 +270,8 @@ print $s; exit;
 # GUI:
 
 sub init_gui {
+    return unless @channels;
+
     $mw = MainWindow->new;
     $mw->geometry($opts{geometry}) if defined $opts{geometry};
     $mw->title('clivefeed');
