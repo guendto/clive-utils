@@ -101,6 +101,7 @@ $opts{mainfont} = "{helvetica} -12 bold" unless $opts{mainfont};
 GetOptions(\%opts,
     'debug|d', 'help|h',  'manual|m',  'version|v',  'all|a',
     'paste|x', 'quiet|q', 'clive|c=s', 'opts|o=s',   'agent|U=s',
+    'proxy|y=s',
     # Workaround since '$longopt|shortopt' is a no-no.
     'noproxy|X' => sub { $opts{proxy} = ""; },
 ) or pod2usage(1);
@@ -606,6 +607,11 @@ B<HTTP Options>
 =item B<-U --agent=>I<string>
 
 Identify as I<string> to the HTTP server. Defaults to "Mozilla/5.0".
+
+=item B<-y --proxy=>I<address>
+
+Use I<address> for HTTP proxy, e.g. http://foo:1234. If http_proxy
+environment variable is defined, it will be used.
 
 =back
 
