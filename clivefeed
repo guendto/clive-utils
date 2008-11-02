@@ -250,6 +250,7 @@ Modules:
   * XML::RSS::LibXML/$XML::RSS::LibXML::VERSION\t* Clipboard/$clipb_v
   * Tk/$Tk::VERSION\t\t\t* Tk::Tree/$Tk::Tree::VERSION
   * Tk::DialogBox/$Tk::DialogBox::VERSION\t\t* HTML::Strip/$HTML::Strip::VERSION
+  * Tk::FontDialog/$Tk::FontDialog::VERSION
 Core modules:
   * Getopt::Long/$Getopt::Long::VERSION\t\t* Digest::SHA/$Digest::SHA::VERSION
   * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION

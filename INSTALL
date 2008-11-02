@@ -11,6 +11,7 @@ Perl >= 5.8
     * XML::RSS::LibXML/0.3002     * Clipboard/0.09
     * Tk/804.027                  * Tk::Tree/4.005
     * Tk::DialogBox/4.013         * HTML::Strip/1.06
+    * Tk::FontDialog/0.15
 
     * Getopt::Long/2.35           * Digest::SHA/5.47
     * File::Spec/3.12             * File::Find/1.10
