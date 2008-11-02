@@ -38,7 +38,6 @@ use Tk;
 
 # Core modules:
 use Getopt::Long qw(:config bundling);
-use Digest::SHA qw(sha1_hex);
 use File::Spec;
 use File::Find;
 use File::Path;

@@ -3,6 +3,7 @@ Version 2.0beta2
 
  Developer-visible changes:
    * Added missing Tk::FontDialog prerequisite (--version, INSTALL)
+   * Removed unnecessary import of Digest::SHA
 
 
 Version 2.0beta1
