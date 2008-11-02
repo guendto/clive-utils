@@ -95,7 +95,7 @@ $opts{debug}    = 0;
 $opts{help}     = 0;
 $opts{manual}   = 0;
 $opts{version}  = 0;
-$opts{mainfont} = "{helvetica} -12 bold" unless $opts{mainfont};
+$opts{mainfont} = $opts{mainfont} || "{helvetica} -12 bold";
 
 GetOptions(\%opts,
     'debug|d', 'help|h',  'manual|m',  'version|v',  'all|a',
