@@ -110,7 +110,7 @@ print_version(0) if $opts{version};
 pod2usage(-exitstatus => 0, -verbose => 1) if $opts{help};
 pod2usage(-exitstatus => 0, -verbose => 2) if $opts{manual};
 
-$opts{clive} = $ENV{CLIVE_PATH} unless $opts{clive};
+$opts{clive} = $opts{clive} || $ENV{CLIVE_PATH};
 find_clive() unless $opts{clive};
 
 #init_gui(); exit;
