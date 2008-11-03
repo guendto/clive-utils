@@ -35,3 +35,4 @@ Run:
 
 Getting started:
     % clivefeed --manual
+    % pod2man clive > clive.1 # See pod2man(1) manual for more
