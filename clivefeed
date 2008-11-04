@@ -51,8 +51,7 @@ eval "use Clipboard"; $opted_mods{Clipboard}=0 if $@;
 
 my $VERSION     = "2.0beta2";
 my $CONFIGDIR   = $ENV{CLIVEFEED_CONFIGDIR}
-    ? $ENV{CLIVEFEED_CONFIGDIR}
-    : File::Spec->catfile($ENV{HOME}, ".config/clivefeed");
+    || File::Spec->catfile($ENV{HOME}, ".config/clivefeed"); 
 my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
 my $PREFSFILE   = File::Spec->catfile($CONFIGDIR, "prefs");
 
@@ -113,13 +112,9 @@ pod2usage(-exitstatus => 0, -verbose => 2) if $opts{manual};
 $opts{clive} = $opts{clive} || $ENV{CLIVE_PATH};
 find_clive() unless $opts{clive};
 
-#init_gui(); exit;
-
 get_queue();
-
-select STDERR; $| = 1; # Go unbuffered
+select STDERR; $| = 1; # => unbuffered
 select STDOUT; $| = 1;
-
 process_queue();
 
 unless ( $opts{all} ) { init_gui(); } 
@@ -130,10 +125,7 @@ else                  { grab_all(); }
 
 sub init_curl {
     $curl = WWW::Curl::Easy->new;
-
-    $curl->setopt(CURLOPT_USERAGENT,
-        $opts{agent} ? $opts{agent} : "Mozilla/5.0");
-
+    $curl->setopt(CURLOPT_USERAGENT, $opts{agent} || "Mozilla/5.0");
     $curl->setopt(CURLOPT_PROXY, $opts{proxy}) if defined $opts{proxy};
     $curl->setopt(CURLOPT_VERBOSE, 1) if $opts{debug};
     $curl->setopt(CURLOPT_FOLLOWLOCATION, 1);
@@ -286,7 +278,8 @@ sub init_gui {
     $file->command(-label => 'Extract videos in queue...',
         -underline => 0, -command =>  \&on_extract);
     $file->separator;
-    $file->command(-label => 'Quit', -underline => 0, -command => sub {exit});
+    $file->command(-label => 'Quit', -underline => 0,
+        -command => sub { save_prefs(); exit; } );
 
     # Menu: Edit
     my $edit = $mb->cascade(-label => 'Edit', -underline => 0, -tearoff => 0);
@@ -371,12 +364,10 @@ sub init_gui {
     $bar->Button(-text => 'Extract videos...', -command=> \&on_extract,
     )->pack(-fill => 'x', -side => 'bottom');
 
-    $pwbottom->add($lbqueue, $bar,
-        -width => $opts{pwbottom} ? $opts{pwbottom} : 200);
+    $pwbottom->add($lbqueue, $bar, -width => $opts{pwbottom} || 200);
 
     # Add upper and lower parts to main paned window
-    $pwmain->add($pwtop, $pwbottom,
-        -height => $opts{pwmain} ? $opts{pwmain} : 200);
+    $pwmain->add($pwtop, $pwbottom, -height => $opts{pwmain} || 200);
 
     $mw->RefontTree(-font => $opts{mainfont});
     $pwmain->pack(-expand => 1, -fill => 'both');
