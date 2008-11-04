@@ -487,7 +487,7 @@ sub on_prefs {
     my $mainfontl = $dlg->Label(-textvariable => \$mainfont);
 
     $dlg->add('Button', -text => 'Main font',
-        -command => sub { change_font_descr($dlg, \$mainfont, $mainfontl) }
+        -command => sub { change_font($dlg, \$mainfont, $mainfontl) }
     )->grid($mainfontl, -sticky => 'w', -padx => '5');
 
     on_prefs_ok($mainfont) if $dlg->Show eq 'OK';

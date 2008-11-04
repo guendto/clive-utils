@@ -1,6 +1,9 @@
 Version 2.0beta2
 (? ??, 2008)
 
+ User-visible changes:
+   * Fixed Preferences / Mainfont
+
  Developer-visible changes:
    * Added missing Tk::FontDialog prerequisite (--version, INSTALL)
    * Removed unnecessary import of Digest::SHA
