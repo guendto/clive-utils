@@ -2,6 +2,9 @@ Version 2.0beta2
 (? ??, 2008)
 
  User-visible changes:
+   * Added configs/clivescan.configrc example
+   * Added clivescan utility
+   * Added example config file for clivescan
    * Fixed File / Quit: did not save prefs
    * Fixed Preferences / Mainfont
 

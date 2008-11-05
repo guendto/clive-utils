@@ -1,0 +1,579 @@
+#!/usr/bin/env perl
+# -*- coding: ascii -*-
+###########################################################################
+# clivescan, the video link scanning utility for clive
+# Copyright (C) 2008 Toni Gundogdu.
+#
+# This file is part of clive-utils.
+#
+# clivescan is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# clivescan is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with clivescan.  If not, see <http://www.gnu.org/licenses/>.
+###########################################################################
+
+# Keep it simple.
+
+use warnings;
+use strict;
+
+binmode(STDOUT, ":utf8");
+
+use HTML::TokeParser;
+use WWW::Curl::Easy;
+use Tk::FontDialog;
+use Tk::DialogBox;
+use Config::Tiny;
+use Tk::Tree;
+use Tk;
+
+# Core modules:
+use Getopt::Long qw(:config bundling);
+use Digest::SHA qw(sha1_hex);
+use File::Spec;
+use File::Find;
+use File::Path;
+use Pod::Usage;
+use Encode;
+use Cwd;
+
+# Non-essentials
+my %opted_mods = (Clipboard => 1);
+eval "use Clipboard"; $opted_mods{Clipboard}=0 if $@;
+
+my $VERSION     = "2.0beta2";
+my $CONFIGDIR   = $ENV{CLIVESCAN_CONFIGDIR}
+    || File::Spec->catfile($ENV{HOME}, ".config/clivescan");
+my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
+my $PREFSFILE   = File::Spec->catfile($CONFIGDIR, "prefs");
+
+my %opts;       # Holds the options
+my @queue;      # Holds the current URL queue
+my %found_queue;# Holds the results of the scanned video page links
+my $curl;       # Holds the curl handle (reused throught lifespan)
+my $mw;         # Holds the main window handle (GUI)
+my $pwmain;     # Holds the handle to the main paned window
+my $pwtop;      # Holds the handle to the top paned window
+my $pwbottom;   # Holds the handle to the bottom paned window
+my $lbtlink;    # Holds the handle to the listbox tree of found links
+my $lbtqueue;   # Holds the handle to the listbox tree of queued links
+
+# Parse config
+my $conf = Config::Tiny->read($CONFIGFILE);
+my $prefs = Config::Tiny->read($PREFSFILE);
+%opts = (
+    clive   => $conf->{clive}->{path},
+    opts    => $conf->{clive}->{opts},
+    agent   => $conf->{http}->{agent},
+    proxy   => $conf->{http}->{proxy},
+
+    geometry=> $prefs->{gui}->{geometry},
+    pwmain  => $prefs->{gui}->{pwmain},
+    pwtop   => $prefs->{gui}->{pwtop},
+    pwbottom=> $prefs->{gui}->{pwbottom},
+    mainfont=> $prefs->{gui}->{mainfont},
+);
+
+# Parse cmdline
+# Define those not read from config, init with defaults
+$opts{quiet}    = 0;
+$opts{paste}    = 0;
+$opts{all}      = 0;
+$opts{debug}    = 0;
+$opts{help}     = 0;
+$opts{manual}   = 0;
+$opts{version}  = 0;
+$opts{mainfont} = $opts{mainfont} || "{helvetica} -12 bold";
+
+GetOptions(\%opts,
+    'debug|d', 'help|h',  'manual|m',  'version|v',  'all|a',
+    'paste|x', 'quiet|q', 'clive|c=s', 'opts|o=s',   'agent|U=s',
+    'proxy|y=s',
+    # Workaround since '$longopt|shortopt' is a no-no.
+    'noproxy|X' => sub { $opts{proxy} = ""; },
+) or pod2usage(1);
+
+# Since 'version|v' => \&print_version and exit cannot tango with tk
+print_version(0) if $opts{version}; 
+pod2usage(-exitstatus => 0, -verbose => 1) if $opts{help};
+pod2usage(-exitstatus => 0, -verbose => 2) if $opts{manual};
+
+$opts{clive} = $opts{clive} || $ENV{CLIVE_PATH};
+find_clive() unless $opts{clive};
+
+get_queue();
+
+select STDERR; $| = 1; # => unbuffered
+select STDOUT; $| = 1;
+
+process_queue();
+
+unless ( $opts{all} ) { init_gui(); } 
+else                  { grab_all(); }
+
+
+## Subroutines: Connection
+
+sub init_curl {
+    $curl = WWW::Curl::Easy->new;
+    $curl->setopt(CURLOPT_USERAGENT, $opts{agent} || "Mozilla/5.0");
+    $curl->setopt(CURLOPT_PROXY, $opts{proxy}) if defined $opts{proxy};
+    $curl->setopt(CURLOPT_VERBOSE, 1) if $opts{debug};
+    $curl->setopt(CURLOPT_FOLLOWLOCATION, 1);
+    $curl->setopt(CURLOPT_AUTOREFERER, 1);
+    $curl->setopt(CURLOPT_HEADER, 0);
+    $curl->setopt(CURLOPT_NOBODY, 0);
+}
+
+sub fetch_page {
+    my ($url, $resp, $rc) = (shift, 0, 0);
+    open my $fh, ">", \$resp;
+
+    $curl->setopt(CURLOPT_URL, $url);
+    $curl->setopt(CURLOPT_ENCODING, "");
+    $curl->setopt(CURLOPT_WRITEDATA, $fh);
+    $rc = $curl->perform;
+
+    return ($rc, $fh, $resp);
+}
+
+
+## Subroutines: Queue
+
+sub get_queue {
+    if ( $opts{paste} ) {
+        print STDERR "error: Clipboard module not found" and exit
+            unless $opted_mods{Clipboard};
+        my $data = Clipboard->paste();
+        if ( $data ) {
+            parse_input($_) foreach split/\n/,$data;
+        }
+    }
+
+    parse_input($_) foreach @ARGV;
+    unless ( @queue ) { parse_input($_) while ( <STDIN> ); }
+
+    my %h = map {$_,1} @queue; # Remove duplicates
+    @queue = keys %h;
+}
+
+sub process_queue {
+    init_curl();
+    foreach ( @queue ) {
+        print "Fetching $_ ..." unless $opts{quiet};
+        my ($rc, $fh, $resp, $errmsg) = fetch_page($_);
+        if ( $rc == 0 ) {
+            $rc = $curl->getinfo(CURLINFO_RESPONSE_CODE);
+            if ( $rc == 0 or $rc == 200 ) {
+                scan_page($_, \$resp);
+            } else {
+                $errmsg = $curl->strerror($rc)." (http/$rc)";
+            }
+        } else {
+            $errmsg = $curl->strerror($rc)." (http/$rc)";
+        }
+        close $fh;
+        print STDERR "\n==> error: $errmsg\n" if $errmsg;
+    }
+}
+
+sub scan_page {
+    my ($scanurl, $pageref) = @_;
+    print "done.\n" unless $opts{quiet};
+    $$pageref =~ tr{\n}//d;
+
+    my $p = HTML::TokeParser->new($pageref);
+    $p->get_tag("title");
+    my $pagetitle = $p->get_trimmed_text;
+
+    my %re = (
+        Youtube => {
+            url_prefix => "http://youtube.com/watch?v=",
+            search_for => qr|\Q/watch?v=\E(.*?)["< &]|i,
+        },
+        YoutubeEmbed => {
+            url_prefix => "http://youtube.com/watch?v=",
+            search_for => qr|\Qyoutube.com/v/\E(.*?)/|i,
+        },
+        GVideo => { # NOTE: Ignores original TLD, uses .com for extraction
+            url_prefix => "http://video.google.com/videoplay?docid=",
+            search_for => qr|\Q/googleplayer.swf?docid=\E(.*?)["< &]|i,
+        },
+        GVideoEmbed => { # NOTE: Ditto.
+            url_prefix => "http://video.google.com/videoplay?docid=",
+            search_for => qr|\Q/videoplay?docid=\E(.*?)["< &]|i,
+        },
+    );
+
+    print "=> Scanning page for links " unless $opts{quiet};
+
+    sub _scan_progress {
+        my ($linksref, $link) = @_;
+        push @$linksref,$link;
+        if ( scalar (@$linksref) % 5 == 0 ) { print scalar (@$linksref); }
+        else { print "."; }
+    }
+
+    my @links;
+    while ( my $host = each( %re ) ) {
+        _scan_progress(\@links, "$re{$host}{url_prefix}$1")
+            while ( $$pageref =~ /$re{$host}{search_for}/g );
+    }
+
+    my %h = map { $_, 1 } @links; # Weed out duplicates
+    @links = keys %h;
+    #print "$_\n" foreach(@links);
+
+    print "\n=> Found " .scalar @links. " links after removing duplicates.\n"
+        unless $opts{quiet};
+
+    my %verified_links;
+    foreach my $link ( @links ) {
+        print "==> Fetching $link ..." unless $opts{quiet};
+        my ($rc, $fh, $resp, $errmsg) = fetch_page($link);
+        if ( $rc == 0 ) {
+            $rc = $curl->getinfo(CURLINFO_RESPONSE_CODE);
+            if ( $rc == 0 or $rc == 200 ) {
+                print "done.\n" unless $opts{quiet};
+                # Grab title
+                $p = HTML::TokeParser->new(\$resp);
+                $p->get_tag("title");
+                my $title = $p->get_trimmed_text;
+                # Store, prevent link duplicates
+                my $sha1 = sha1_hex($link); 
+                $verified_links{$sha1} = {link => $link, title => $title}
+                    unless defined $verified_links{$sha1};
+            } else {
+                $errmsg = $curl->strerror($rc)." (http/$rc)";
+            }
+        } else {
+            $errmsg = $curl->strerror($rc)." (http/$rc)";
+        }
+        close $fh;
+        print STDERR "\n==> error: $errmsg\n" if $errmsg;
+    }
+
+    $found_queue{ sha1_hex($scanurl) } =
+        { title => $pagetitle, url => $scanurl, videos => {%verified_links} };
+}
+
+sub grab_all {
+    my @q;
+    for my $i ( keys %found_queue ) {
+        my %videos = %{$found_queue{$i}{videos}};
+        for my $j ( keys %videos ) {
+            push @q, $videos{$j}{link};
+        }
+    }
+    run_clive(@q);
+}
+
+
+## Subroutines: Helpers
+
+sub parse_input {
+    my $url = shift;
+
+    return if $url =~ /^$/;
+    chomp $url;
+
+    $url = "http://$url" if $url !~ m!^http://!i;
+    push @queue, $url;
+}
+
+sub find_clive {
+    print "Trying to locate 'clive' ...";
+
+    find ( sub { $opts{clive} = $File::Find::name if ( $_ eq 'clive' ) },
+        split /:/, $ENV{PATH} || getcwd);
+
+    if   ( $opts{clive} ) { print "$opts{clive}\n"; }
+    else { print STDERR "error: not found, use --clive=path\n"; exit; }
+}
+
+sub run_clive {
+    my (@q) = @_;
+    system "$opts{clive} $opts{opts} " . join(' ', @q);
+}
+
+sub print_version {
+    my $noexit  = shift;
+    my $perl_v  = sprintf "%vd", $^V;
+    my $clipb_v = $opted_mods{Clipboard} ? $Clipboard::VERSION : "-";
+    my $s       = sprintf
+"clivescan version $VERSION.  Copyright (C) 2008 Toni Gundogdu.
+
+Perl: $perl_v ($^O)
+Modules:
+  * Config::Tiny/$Config::Tiny::VERSION\t\t* WWW::Curl/$WWW::Curl::VERSION
+  * Tk/$Tk::VERSION\t\t\t* Tk::Tree/$Tk::Tree::VERSION
+  * Tk::DialogBox/$Tk::DialogBox::VERSION\t\t* Clipboard/$clipb_v
+  * Tk::FontDialog/$Tk::FontDialog::VERSION
+Core modules:
+  * Getopt::Long/$Getopt::Long::VERSION\t\t* Digest::SHA/$Digest::SHA::VERSION
+  * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
+  * File::Path/$File::Path::VERSION\t\t* Encode/$Encode::VERSION
+  * Pod::Usage/$Pod::Usage::VERSION\t\t* Cwd/$Cwd::VERSION
+
+This program comes with ABSOLUTELY NO WARRANTY. You may redistribute copies of
+clivescan under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your option)
+any later version. You should have received a copy of the General Public License
+along with this program. If not, see http://www.gnu.org/licenses/.
+";
+return $s if $noexit;
+print $s; exit;
+}
+
+
+# GUI:
+
+sub init_gui {
+    return unless %found_queue;
+
+    $mw = MainWindow->new;
+    $mw->geometry($opts{geometry}) if defined $opts{geometry};
+    $mw->title('clivescan');
+    $mw->protocol('WM_DELETE_WINDOW', sub { save_prefs(); exit; });
+
+    # Menubar
+    my $mb = $mw->Menu;
+    $mw->configure(-menu => $mb);
+
+    # Menu: File
+    my $file = $mb->cascade(-label => 'File', -underline => 0, -tearoff => 0);
+    $file->command(-label => 'Extract videos in queue...',
+        -underline => 0, -command =>  \&on_extract);
+    $file->separator;
+    $file->command(-label => 'Quit', -underline => 0,
+        -command => sub { save_prefs(); exit; } );
+
+    # Menu: Edit
+    my $edit = $mb->cascade(-label => 'Edit', -underline => 0, -tearoff => 0);
+    $edit->command(-label => 'Preferences...',
+        -underline => 0, -command => \&on_prefs);
+
+    # Menu: Help
+    my $help = $mb->cascade(-label => 'Help', -underline => 0, -tearoff => 0);
+    $help->command(-label => 'About...',
+        -underline => 0, -command => \&on_about);
+
+    # The GUI has an upper and a lower part
+    $pwmain = $mw->Panedwindow(-orient => 'v', -opaqueresize => 0);
+
+    # Upper part
+    $pwtop = $pwmain->Panedwindow(-orient => 'h', -opaqueresize => 0);
+
+    # Upper: Channels
+    my $lbar = $pwtop->Frame;
+
+    $lbtlink = $lbar->Scrolled('Tree',
+        -scrollbars => 'osoe',
+        -itemtype   => 'text',
+        -selectmode => 'extended',
+        -indicator  => 1,
+        -drawbranch => 1,
+    )->pack(-side => 'top', -expand => 1, -fill => 'both');
+
+    for my $i ( keys %found_queue ) {
+        my $scantitle = $found_queue{$i}{title};
+        $scantitle =~ tr{.}//d;
+
+        $lbtlink->add($scantitle);
+        $lbtlink->itemCreate($scantitle, 0, -text => $scantitle, -itemtype => 'text');
+
+        for my $j ( keys %{$found_queue{$i}{videos}} ) {
+            my %video = %{$found_queue{$i}{videos}{$j}};
+
+            my $title = $video{title};
+            $title =~ tr{.}//d;
+
+            my $path = "$scantitle.$title";
+
+            $lbtlink->add($path, -data => {%video});
+            $lbtlink->itemCreate($path, 0,
+                -text => $title, -itemtype => 'text');
+        }
+    }
+    $lbtlink->autosetmode;
+    $lbtlink->close($_) foreach ( $lbtlink->infoChildren('') );
+
+    my $rbar = $pwtop->Frame; # Button toolbar
+    $rbar->Button(-text => 'Grab', -command => \&on_grab
+    )->pack(-fill => 'x');
+
+    $rbar->Button(-text => 'Grab everything', -command => \&on_grab_all
+    )->pack(-fill => 'x');
+
+    $pwtop->add($lbar, $rbar, -width => $opts{pwtop} || 200);
+
+    # Lower part
+    $pwbottom = $pwmain->Panedwindow(-orient => 'h', -opaqueresize => 0);
+
+    $lbtqueue = $pwbottom->Scrolled('Tree',
+        -scrollbars => 'osoe',
+        -itemtype   => 'text',
+        -selectmode => 'extended',
+        -indicator  => 1,
+        -drawbranch => 1,
+    );
+
+    my $bar = $pwbottom->Frame; # Button toolbar
+
+    $bar->Button(-text => 'Remove', -command => \&on_remove
+    )->pack(-fill => 'x');
+
+    $bar->Button(-text => 'Clear', -command => \&on_clear
+    )->pack(-fill => 'x');
+
+    $bar->Button(-text => 'Extract videos...', -command => \&on_extract
+    )->pack(-fill => 'x', -side => 'bottom');
+
+    $pwbottom->add($lbtqueue, $bar, -width => $opts{pwbottom} || 200);
+
+    # Add upper and lower parts to main paned window
+    $pwmain->add($pwtop, $pwbottom, -height => $opts{pwmain} || 200);
+
+    $mw->RefontTree(-font => $opts{mainfont});
+    $pwmain->pack(-expand => 1, -fill => 'both');
+
+    MainLoop;
+}
+
+sub save_prefs {
+    mkpath( [$CONFIGDIR], 1, 0700 );
+
+    my $c = Config::Tiny->new;
+    $c->{gui}->{geometry} = $mw->geometry();
+    $c->{gui}->{pwmain}   = ($pwmain->sashCoord(0))[1]-7;
+    $c->{gui}->{pwtop}    = ($pwtop->sashCoord(0))[0]-7;
+    $c->{gui}->{pwbottom} = ($pwbottom->sashCoord(0))[0]-7;
+    $c->{gui}->{mainfont} = $opts{mainfont};
+
+    $c->write($PREFSFILE);
+}
+
+sub on_prefs_ok {
+    ($opts{mainfont}) = @_;
+    $mw->RefontTree(-font => $opts{mainfont});
+    save_prefs();
+}
+
+sub queue_item {
+    my $path = shift;
+    return if $path !~ /\./;
+    return if $lbtqueue->infoExists($path);
+
+    my %video = %{$lbtlink->infoData($path)};
+    my ($link) = split /\./, $path;
+    
+    unless ( $lbtqueue->infoExists($link) ) {
+        $lbtqueue->add($link);
+        $lbtqueue->itemCreate($link, 0,
+            -text => $link, -itemtype => 'text');
+    }
+
+    $lbtqueue->add($path, -data => {%video});
+    $lbtqueue->itemCreate($path, 0,
+        -text => $video{title}, -itemtype => 'text');
+}
+
+sub on_grab {
+    queue_item($_) foreach ( $lbtlink->infoSelection );
+    $lbtqueue->autosetmode;
+}
+
+sub on_grab_all {
+    foreach ( $lbtlink->infoChildren("") ) {
+        my ($parent) = split /\./;
+        queue_item($_)
+            foreach ($lbtlink->infoChildren($parent) );
+    }
+    $lbtqueue->autosetmode;
+}
+
+sub on_remove {
+    $lbtqueue->deleteEntry($_)
+        foreach ( $lbtqueue->infoSelection );
+}
+
+sub on_clear {
+    $lbtqueue->deleteAll;
+}
+
+sub on_about {
+    my $dlg = $mw->DialogBox(-title => 'About', -buttons => ['OK']);
+    my $txt = $dlg->add('Text')->pack;
+    $txt->insert('end', print_version(1));
+    $dlg->Show;
+}
+
+sub change_font {
+    my ($top, $lblv, $lbl) = @_;
+    my $font = $top->FontDialog(-initfont => $$lblv)->Show;
+
+    if ( defined $font ) {
+        my $descr = $top->FontDialog->GetDescriptiveFontName($font);
+        $lbl->configure(-font => $descr);
+        $$lblv =  $descr;
+    }
+}
+
+sub on_prefs {
+    my $dlg = $mw->DialogBox(-title => 'clivescan preferences',
+        -buttons => ['OK','Cancel']);
+
+    $dlg->add('Label', -text => 'Fonts: press to choose'
+    )->grid(-sticky => 'w', -pady => 10);
+
+    my ($mainfont) = ($opts{mainfont});
+    my $mainfontl = $dlg->Label(-textvariable => \$mainfont);
+
+    $dlg->add('Button', -text => 'Main font',
+        -command => sub { change_font($dlg, \$mainfont, $mainfontl) }
+    )->grid($mainfontl, -sticky => 'w', -padx => '5');
+
+    on_prefs_ok($mainfont) if $dlg->Show eq 'OK';
+}
+
+sub on_extract {
+    my @q;
+    foreach ( $lbtqueue->infoChildren('') ) {
+        foreach ( $lbtqueue->infoChildren($_) ) {
+            my %video = %{$lbtqueue->infoData($_)};
+            push @q, $video{link};
+        }
+    }
+    return unless @q;
+
+    # Prompt for clive(1) options
+    my $dlg = $mw->DialogBox(-title => 'clive(1) options',
+        -buttons => ['OK','Cancel']);
+
+    $dlg->add('Label', -text => 'Path to clive'
+    )->grid(my $clivepath = $dlg->Entry(-width => 25),
+        -sticky => 'w', -padx => '5');
+
+    $dlg->add('Label', -text => 'Runtime options'
+    )->grid(my $cliveopts = $dlg->Entry(-width => 25),
+        -sticky => 'w', -padx => '5');
+
+    $clivepath->insert('end', $opts{clive});
+    $cliveopts->insert('end', $opts{opts});
+
+    if ( $dlg->Show() eq 'OK' ) {
+        $opts{clive} = $clivepath->get;
+        $opts{opts}  = $cliveopts->get;
+        $mw->destroy;
+        run_clive(@q);
+    }
+}
+
