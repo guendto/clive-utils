@@ -219,6 +219,14 @@ sub scan_page {
             url_prefix => "http://metacafe.com/watch/",
             search_for => qr|\Qmetacafe.com/fplayer/\E(.*?)/|i,
         },
+        SevenLoad => { # NOTE: Ditto. Subdomain can be ignored.
+            url_prefix => "http://sevenload.com/videos/",
+            search_for => qr|\Q/videos/\E(.*?)\-|i,
+        },
+        SevenLoadEmbed => {
+            url_prefix => "http://sevenload.com/videos/",
+            search_for => qr|\Qsevenload.com/pl/\E(.*?)/|i,
+        },
     );
 
     print "=> Scanning page for links " unless $opts{quiet};
