@@ -211,6 +211,14 @@ sub scan_page {
             url_prefix => "http://video.google.com/videoplay?docid=",
             search_for => qr|\Q/videoplay?docid=\E(.*?)["< &]|i,
         },
+        Metacafe => { # NOTE: metacafe.com/watch/$id is enough for redirect
+            url_prefix => "http://metacafe.com/watch/",
+            search_for => qr|\Q/watch/\E(.*?)/|i,
+        },
+        MetacafeEmbed => {
+            url_prefix => "http://metacafe.com/watch/",
+            search_for => qr|\Qmetacafe.com/fplayer/\E(.*?)/|i,
+        },
     );
 
     print "=> Scanning page for links " unless $opts{quiet};
