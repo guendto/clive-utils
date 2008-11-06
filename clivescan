@@ -559,11 +559,11 @@ sub on_extract {
         -buttons => ['OK','Cancel']);
 
     $dlg->add('Label', -text => 'Path to clive'
-    )->grid(my $clivepath = $dlg->Entry(-width => 25),
+    )->grid(my $clivepath = $dlg->Entry(-width => 60),
         -sticky => 'w', -padx => '5');
 
     $dlg->add('Label', -text => 'Runtime options'
-    )->grid(my $cliveopts = $dlg->Entry(-width => 25),
+    )->grid(my $cliveopts = $dlg->Entry(-width => 60),
         -sticky => 'w', -padx => '5');
 
     $clivepath->insert('end', $opts{clive});
