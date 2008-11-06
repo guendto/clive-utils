@@ -227,6 +227,13 @@ sub scan_page {
             url_prefix => "http://sevenload.com/videos/",
             search_for => qr|\Qsevenload.com/pl/\E(.*?)/|i,
         },
+        Break => {
+            url_prefix => "http://break.com/index/",
+            search_for => qr|\Q/index/\E(.*?)["< &]|i,
+        },
+        # TODO: add BreakEmbed, e.g.:
+        # Page  URL: http://break.com/index/if-all-movies-had-cell-phones.html
+        # Embed URL: http://embed.break.com/600081
     );
 
     print "=> Scanning page for links " unless $opts{quiet};
