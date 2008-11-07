@@ -624,12 +624,12 @@ Parses the feed at the specified URL.
 
 =item % cat E<gt>E<gt> url.lst
 
-http://youtube.com/rss/user/googletechtalks/videos.rss
-http://youtube.com/rss/user/theonion/videos.rss
-http://youtube.com/rss/user/lisanova/videos.rss
-http://youtube.com/rss/user/clipcritics/videos.rss
-http://youtube.com/rss/user/communitychannel/videos.rss
-http://youtube.com/rss/user/manintheboxshow/videos.rss
+ http://youtube.com/rss/user/googletechtalks/videos.rss
+ http://youtube.com/rss/user/theonion/videos.rss
+ http://youtube.com/rss/user/lisanova/videos.rss
+ http://youtube.com/rss/user/clipcritics/videos.rss
+ http://youtube.com/rss/user/communitychannel/videos.rss
+ http://youtube.com/rss/user/manintheboxshow/videos.rss
 
 =item % cat url.lst | clivefeed
 
@@ -665,15 +665,15 @@ GUI preferences (e.g. fonts, window position, sash coords, ...).
 
 =head1 CONFIG
 
-    ## Example config file for clivefeed.
+ ## Example config file for clivefeed.
 
-    [clive]
-        path = /usr/local/bin/clive
-        opts = -f mp4
+ [clive]
+   path = /usr/local/bin/clive
+   opts = -f mp4
 
-    [http]
-        agent = Mozilla/5.0
-        proxy = http://foo:1234
+ [http]
+   agent = Mozilla/5.0
+   proxy = http://foo:1234
 
 =head1 SEE ALSO
 
