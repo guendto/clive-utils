@@ -4,10 +4,12 @@ Version 2.0beta2
  User-visible changes:
    * Added clivescan utility
    * Added configs/clivescan.configrc example
-   * clivefeed: Fixed File / Quit: did not save prefs
-   * clivefeed: Fixed Preferences / Mainfont
+   - clivefeed
+   * Fixed File / Quit: did not save prefs
+   * Fixed Preferences / Mainfont
 
  Developer-visible changes:
+   - clivefeed
    * Cleaned up some code
    * Added missing Tk::FontDialog prerequisite (--version, INSTALL)
    * Removed unnecessary import of Digest::SHA
