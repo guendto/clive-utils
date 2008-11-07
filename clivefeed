@@ -622,7 +622,7 @@ Do not use the defined HTTP proxy (B<--proxy>, config or http_proxy).
 
 Parses the feed at the specified URL.
 
-=item cat E<gt>E<gt> url.lst
+=item % cat E<gt>E<gt> url.lst
 
 http://youtube.com/rss/user/googletechtalks/videos.rss
 http://youtube.com/rss/user/theonion/videos.rss
@@ -631,7 +631,7 @@ http://youtube.com/rss/user/clipcritics/videos.rss
 http://youtube.com/rss/user/communitychannel/videos.rss
 http://youtube.com/rss/user/manintheboxshow/videos.rss
 
-=item cat url.lst | clivefeed
+=item % cat url.lst | clivefeed
 
 Reads input from UNIX pipe.
 
@@ -685,7 +685,7 @@ Project: http://googlecode.com/p/clive-utils/
 
 A clive-utils development repository can be obtained from:
 
-    git clone git://repo.or.cz/clive-utils.git
+    % git clone git://repo.or.cz/clive-utils.git
 
 Patches welcome.
 
