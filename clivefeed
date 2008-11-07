@@ -564,7 +564,7 @@ part of the B<clive-utils> project.
 
 You may freely specify options after the command-line arguments. For example:
 
-    clivefeed -a URL --opts=--noextract
+    % clivefeed -a URL --opts=--noextract
 
 B<Basic Options>
 
@@ -618,7 +618,7 @@ Do not use the defined HTTP proxy (B<--proxy>, config or http_proxy).
 
 =over 4
 
-=item clivefeed "http://youtube.com/rss/user/communitychannel/videos.rss"
+=item % clivefeed "http://youtube.com/rss/user/communitychannel/videos.rss"
 
 Parses the feed at the specified URL.
 
@@ -635,11 +635,11 @@ http://youtube.com/rss/user/manintheboxshow/videos.rss
 
 Reads input from UNIX pipe.
 
-=item clivefeed --opts="-f mp4"
+=item % clivefeed --opts="-f mp4"
 
 Append the I<opts> to the L<clive(1)> call.
 
-=item clivefeed --all URL
+=item % clivefeed --all URL
 
 Grabs all found videos without prompting.
 
