@@ -377,7 +377,7 @@ print $s; exit;
 # GUI:
 
 sub init_gui {
-    return unless keys ( %found_queue ) == 0;
+    return if keys %found_queue == 0;
 
     $mw = MainWindow->new;
     $mw->geometry($opts{geometry}) if defined $opts{geometry};
