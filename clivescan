@@ -87,6 +87,7 @@ my $prefs = Config::Tiny->read($PREFSFILE);
 $opts{quiet}    = 0;
 $opts{paste}    = 0;
 $opts{all}      = 0;
+$opts{strict}   = 1;
 $opts{debug}    = 0;
 $opts{help}     = 0;
 $opts{manual}   = 0;
@@ -98,7 +99,8 @@ GetOptions(\%opts,
     'paste|x', 'quiet|q', 'clive|c=s', 'opts|o=s',   'agent|U=s',
     'proxy|y=s',
     # Workaround since '$longopt|shortopt' is a no-no.
-    'noproxy|X' => sub { $opts{proxy} = ""; },
+    'noproxy|X'  => sub { $opts{proxy} = "" },
+    'nostrict|S' => sub { $opts{strict} = 0 },
 ) or pod2usage(1);
 
 # Since 'version|v' => \&print_version and exit cannot tango with tk
@@ -195,41 +197,54 @@ sub scan_page {
     my $pagetitle = $p->get_trimmed_text;
 
     my %re = (
+        # in_scanurl: regex used to bind this search pattern to specified
+        #   domain. Undefined for embedded link searches. See clivescan(1).
+        # search_for: regex used to grab the video ID
+        # url_prefix: combined with video ID to construct video page URL
         Youtube => {
-            url_prefix => "http://youtube.com/watch?v=",
+            in_scanurl => qr|\Qyoutube.com\E|i,
             search_for => qr|\Q/watch?v=\E(.*?)["< &]|i,
+            url_prefix => "http://youtube.com/watch?v=",
         },
         YoutubeEmbed => {
-            url_prefix => "http://youtube.com/watch?v=",
+            in_scanurl => undef,
             search_for => qr|\Qyoutube.com/v/\E(.*?)$|i,
+            url_prefix => "http://youtube.com/watch?v=",
         },
         GVideo => { # NOTE: Ignores original TLD, uses .com for extraction
+            in_scanurl => qr|\Qvideo.google.\E|i,
+            search_for => qr|\Q/videoplay?docid=\E(.*?)["< &]|i,
             url_prefix => "http://video.google.com/videoplay?docid=",
-            search_for => qr|\Q/googleplayer.swf?docid=\E(.*?)["< &]|i,
         },
         GVideoEmbed => { # NOTE: Ditto.
+            in_scanurl => undef,
+            search_for => qr|\Q/googleplayer.swf?docid=\E(.*?)|i,
             url_prefix => "http://video.google.com/videoplay?docid=",
-            search_for => qr|\Q/videoplay?docid=\E(.*?)$|i,
         },
         Metacafe => { # NOTE: metacafe.com/watch/$id is enough for redirect
-            url_prefix => "http://metacafe.com/watch/",
+            in_scanurl => qr|\Qmetacafe.com\E|i,
             search_for => qr|\Q/watch/\E(.*?)/|i,
+            url_prefix => "http://metacafe.com/watch/",
         },
         MetacafeEmbed => {
-            url_prefix => "http://metacafe.com/watch/",
+            in_scanurl => undef,
             search_for => qr|\Qmetacafe.com/fplayer/\E(.*?)/|i,
+            url_prefix => "http://metacafe.com/watch/",
         },
         SevenLoad => { # NOTE: Ditto. Subdomain can be ignored.
-            url_prefix => "http://sevenload.com/videos/",
+            in_scanurl => qr|\Qsevenload.com\E|i,
             search_for => qr|\Q/videos/\E(.*?)\-|i,
+            url_prefix => "http://sevenload.com/videos/",
         },
         SevenLoadEmbed => {
-            url_prefix => "http://sevenload.com/videos/",
+            in_scanurl => undef,
             search_for => qr|\Qsevenload.com/pl/\E(.*?)/|i,
+            url_prefix => "http://sevenload.com/videos/",
         },
         Break => {
-            url_prefix => "http://break.com/index/",
+            in_scanurl => qr|\Qbreak.com\E|i,
             search_for => qr|\Q/index/\E(.*?)["< &]|i,
+            url_prefix => "http://break.com/index/",
         },
         # TODO: add BreakEmbed, e.g.:
         # Page  URL: http://break.com/index/if-all-movies-had-cell-phones.html
@@ -247,13 +262,15 @@ sub scan_page {
 
     my @links;
     while ( my $host = each( %re ) ) {
+        if ( defined $re{$host}{in_scanurl} and $opts{strict} ) {
+            next unless $scanurl =~ /$re{$host}{in_scanurl}/;
+        }
         _scan_progress(\@links, "$re{$host}{url_prefix}$1")
             while ( $$pageref =~ /$re{$host}{search_for}/g );
     }
 
     my %h = map { $_, 1 } @links; # Weed out duplicates
     @links = keys %h;
-    #print "$_\n" foreach(@links);
 
     print "\n=> Found " .scalar @links. " links after removing duplicates.\n"
         unless $opts{quiet};
@@ -653,6 +670,44 @@ options.
 =item B<-a --all>
 
 Grab all videos without prompting the GUI.
+
+=item B<-S --nostrict>
+
+This may come as a shock but clivescan is B<not> a perfect utility. This
+option was added as a workaround for some search pattern issues that are
+known to occur in some cases.
+
+When searching for break.com videos, for example, clivescan looks for the
+"/index/" pattern. This is, unfortunately, a fairly common string to be
+found anywhere in the web -- like in the Youtube front page. To demonstrate
+this, try:
+
+ % clivescan --nostrict "http://youtube.com"
+
+Let's dwell deeper into this. Observe.
+
+ % clivescan "http://video.google.com/videosearch?q=inurl%3Abreak"
+
+Returns no break.com videos even though it should. clivescan defaults to
+"strict" host binding, meaning that it makes sure that the B<scan URL>
+contains a hard-coded B<domain pattern>, or "break.com" in this case.
+
+ % clivescan "http://break.com"
+
+Hence the above works as expected. To fix the I<original> issue with the
+video.google.com URL, you need to use the B<--nostrict> option:
+
+ % clivescan -S "http://video.google.com/videosearch?q=inurl%3Abreak"
+
+This causes clivescan to ignore the B<domain pattern>.
+
+Using domains in the search patterns would have been a sound idea but this
+has been made impossible by the video hosts that often refer to their
+video pages using local paths (e.g. href="/watch?v=$id").
+
+It is obviously not a elegant solution, and is even likely to cause other issues
+when scanning multiple sources at once. Should someone come up with a better
+solution, please see L</AUTHOR> for contact details.
 
 =back
 
