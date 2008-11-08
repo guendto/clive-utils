@@ -555,10 +555,10 @@ clivefeed [option]... [URL]...
 clivefeed is an utility that parses RSS feeds containing video page links and
 uses L<clive(1)> to extract them.
 
-Historically, the feed parsing feature was written in Python/Newt and it was
-part of the clive 1.x project. The clivefeed utility was written in Perl/Tk to
-replace the feature that was removed in clive 2.0. The clivefeed utility is
-part of the B<clive-utils> project.
+Historically, the feed parsing function was part of L<clive(1)>
+and it was written in Python/Newt. The clivefeed utility was written
+in Perl/Tk to replace the feature that was removed in clive 2.0. This
+utility is part of the B<clive-utils> project.
 
 =head1 OPTIONS
 
