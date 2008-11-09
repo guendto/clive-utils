@@ -356,7 +356,7 @@ Modules:
   * Config::Tiny/$Config::Tiny::VERSION\t\t* WWW::Curl/$WWW::Curl::VERSION
   * Tk/$Tk::VERSION\t\t\t* Tk::Tree/$Tk::Tree::VERSION
   * Tk::DialogBox/$Tk::DialogBox::VERSION\t\t* Clipboard/$clipb_v
-  * Tk::FontDialog/$Tk::FontDialog::VERSION
+  * Tk::FontDialog/$Tk::FontDialog::VERSION\t\t* HTML::TokeParser/$HTML::TokeParser::VERSION
 Core modules:
   * Getopt::Long/$Getopt::Long::VERSION\t\t* Digest::SHA/$Digest::SHA::VERSION
   * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
