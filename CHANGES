@@ -5,6 +5,7 @@ Version 2.0beta2
    * Added clivescan utility
    * Added configs/clivescan.configrc example
    - clivefeed
+   * Fixed GVideo/RSS (wrapped) video URL handling
    * Fixed File / Quit: did not save prefs
    * Fixed Preferences / Mainfont
 
