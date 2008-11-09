@@ -33,6 +33,7 @@ use Tk::FontDialog;
 use Tk::DialogBox;
 use Config::Tiny;
 use HTML::Strip;
+use URI::Escape;
 use Tk::Tree;
 use Tk;
 
@@ -239,9 +240,9 @@ Perl: $perl_v ($^O)
 Modules:
   * Config::Tiny/$Config::Tiny::VERSION\t\t* WWW::Curl/$WWW::Curl::VERSION
   * XML::RSS::LibXML/$XML::RSS::LibXML::VERSION\t* Clipboard/$clipb_v
-  * Tk/$Tk::VERSION\t\t\t* Tk::Tree/$Tk::Tree::VERSION
+  * Tk/$Tk::VERSION\t\t\t* URI::Escape/$URI::Escape::VERSION
   * Tk::DialogBox/$Tk::DialogBox::VERSION\t\t* HTML::Strip/$HTML::Strip::VERSION
-  * Tk::FontDialog/$Tk::FontDialog::VERSION
+  * Tk::FontDialog/$Tk::FontDialog::VERSION\t\t* Tk::Tree/$Tk::Tree::VERSION
 Core modules:
   * Getopt::Long/$Getopt::Long::VERSION\t\t* Digest::SHA/$Digest::SHA::VERSION
   * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
@@ -512,11 +513,17 @@ sub save_prefs {
 }
 
 sub on_extract {
+    my %re = ( # GVideo has the tendency to wrap everything.
+        UnwrapGVideo => qr|\Qgoogle.com/url?q=\E(.*?)\&|i,
+    );
+
     my @q;
     foreach ( $lbqueue->infoChildren('') ) {
         foreach ( $lbqueue->infoChildren($_) ) {
             my $item = $lbqueue->infoData($_);
-            push @q, $item->{link};
+            my $link = uri_unescape($item->{link});
+            $link = $1 if $link =~ /$re{UnwrapGVideo}/;
+            push @q, $link;
         }
     }
     return unless @q;
