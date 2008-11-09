@@ -208,7 +208,7 @@ sub scan_page {
         },
         YoutubeEmbed => {
             in_scanurl => undef,
-            search_for => qr|\Qyoutube.com/v/\E(.*?)$|i,
+            search_for => qr|\Qyoutube.com/v/\E(.*?)["< &]|i,
             url_prefix => "http://youtube.com/watch?v=",
         },
         GVideo => { # NOTE: Ignores original TLD, uses .com for extraction
@@ -218,7 +218,7 @@ sub scan_page {
         },
         GVideoEmbed => { # NOTE: Ditto.
             in_scanurl => undef,
-            search_for => qr|\Q/googleplayer.swf?docid=\E(.*?)|i,
+            search_for => qr|\Q/googleplayer.swf?docid=\E(.*?)["< &]|i,
             url_prefix => "http://video.google.com/videoplay?docid=",
         },
         Metacafe => { # NOTE: metacafe.com/watch/$id is enough for redirect
