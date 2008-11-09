@@ -436,7 +436,11 @@ sub init_gui {
             my $title = $video{title};
             $title =~ tr{.}//d;
 
-            my $path = "$scantitle.$title";
+            my $path;
+            for ( my $k=0;; ++$k ) {
+                $path = "$scantitle.$title (#$k)";
+                last unless $lbtlink->infoExists($path);
+            }
 
             $lbtlink->add($path, -data => {%video});
             $lbtlink->itemCreate($path, 0,

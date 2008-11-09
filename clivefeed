@@ -319,7 +319,12 @@ sub init_gui {
         foreach my $item ( @{$rss->{items}} ) {
             my $title = $item->{title};
             $title =~ tr{.}{}d;
-            my $path = "$chann.$title";
+
+            my $path;
+            for ( my $i=0;; ++$i ) {
+                $path = "$chann.$title (#$i)";
+                last unless $lbchann->infoExists($path);
+            }
 
             $lbchann->add($path, -data => $item);
             $lbchann->itemCreate($path, 0,
