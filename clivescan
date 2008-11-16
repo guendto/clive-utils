@@ -201,6 +201,10 @@ sub scan_page {
         #   domain. Undefined for embedded link searches. See clivescan(1).
         # search_for: regex used to grab the video ID
         # url_prefix: combined with video ID to construct video page URL
+
+        # NOTE: We're not using domains in the search patterns because
+        # most of the supported hosts refer to their videos using local
+        # paths, e.g. <a href="/watch?v=...">.
         Youtube => {
             in_scanurl => qr|\Qyoutube.com\E|i,
             search_for => qr|\Q/watch?v=\E(.*?)["< &]|i,
@@ -677,41 +681,16 @@ Grab all videos without prompting the GUI.
 
 =item B<-S --nostrict>
 
-This may come as a shock but clivescan is B<not> a perfect utility. This
-option was added as a workaround for some search pattern issues that are
-known to occur in some cases.
-
-When searching for break.com videos, for example, clivescan looks for the
-"/index/" pattern. This is, unfortunately, a fairly common string to be
-found anywhere in the web -- like in the Youtube front page. To demonstrate
-this, try:
-
- % clivescan --nostrict "http://youtube.com"
-
-Let's dwell deeper into this. Observe.
+This option provides a workaround for some search pattern issues that
+are known to occur. For example:
 
  % clivescan "http://video.google.com/videosearch?q=inurl%3Abreak"
 
-Returns no break.com videos even though it should. clivescan defaults to
-"strict" host binding, meaning that it makes sure that the B<scan URL>
-contains a hard-coded B<domain pattern>, or "break.com" in this case.
-
- % clivescan "http://break.com"
-
-Hence the above works as expected. To fix the I<original> issue with the
-video.google.com URL, you need to use the B<--nostrict> option:
+Does not return any break.com videos even though the page lists them.
+This happens because clivescan assumes that the domain break.com can
+be found in the URL. To override this restrictive default behaviour:
 
  % clivescan -S "http://video.google.com/videosearch?q=inurl%3Abreak"
-
-This causes clivescan to ignore the B<domain pattern>.
-
-Using domains in the search patterns would have been a sound idea but this
-has been made impossible by the video hosts that often refer to their
-video pages using local paths (e.g. href="/watch?v=$id").
-
-It is obviously not a elegant solution, and is even likely to cause other issues
-when scanning multiple sources at once. Should someone come up with a better
-solution, please see L</AUTHOR> for contact details.
 
 =back
 
