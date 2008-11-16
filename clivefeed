@@ -147,7 +147,7 @@ sub fetch_feed {
     $rc = $curl->getinfo(CURLINFO_RESPONSE_CODE);
 
     if ( $rc == 200 ) {
-        print "done.\n";
+        print "done.\n" unless $opts{quiet};
         process_feed($url, $response);
     } else {
         print STDERR "\nerror: " .$curl->strerror($rc)." (http/$rc)\n";
@@ -215,12 +215,12 @@ sub parse_input {
 }
 
 sub find_clive {
-    print "Trying to locate 'clive' ...";
+    print "Trying to locate 'clive' ..." unless $opts{quiet};
 
     find ( sub { $opts{clive} = $File::Find::name if ( $_ eq 'clive' ) },
         split /:/, $ENV{PATH} || getcwd);
 
-    if   ( $opts{clive} ) { print "$opts{clive}\n"; }
+    if   ( $opts{clive} ) { print "$opts{clive}\n" unless $opts{quiet}; }
     else { print STDERR "error: not found, use --clive=path\n"; exit; }
 }
 

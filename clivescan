@@ -260,8 +260,10 @@ sub scan_page {
     sub _scan_progress {
         my ($linksref, $link) = @_;
         push @$linksref,$link;
-        if ( scalar (@$linksref) % 5 == 0 ) { print scalar (@$linksref); }
-        else { print "."; }
+        unless ( $opts{quiet} ) {
+            if ( scalar (@$linksref) % 5 == 0 ) { print scalar (@$linksref); }
+            else { print "."; }
+        }
     }
 
     my @links;
@@ -334,12 +336,12 @@ sub parse_input {
 }
 
 sub find_clive {
-    print "Trying to locate 'clive' ...";
+    print "Trying to locate 'clive' ..." unless $opts{quiet};
 
     find ( sub { $opts{clive} = $File::Find::name if ( $_ eq 'clive' ) },
         split /:/, $ENV{PATH} || getcwd);
 
-    if   ( $opts{clive} ) { print "$opts{clive}\n"; }
+    if   ( $opts{clive} ) { print "$opts{clive}\n" unless $opts{quiet}; }
     else { print STDERR "error: not found, use --clive=path\n"; exit; }
 }
 
