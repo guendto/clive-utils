@@ -650,7 +650,7 @@ utility is part of the B<clive-utils> project.
 
 You may freely specify options after the command-line arguments. For example:
 
-    clivescan -a URL --opts=--noextract
+    % clivescan -a URL --opts=--noextract
 
 B<Basic Options>
 
