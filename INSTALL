@@ -41,7 +41,10 @@ Run:
     # clive-utils programs try to locate it in the $PATH.
 
     % clivefeed [option]... [URL]...
+    % clivescan [option]... [URL]...
 
 Getting started:
     % clivefeed --manual
-    % pod2man clive > clive.1 # See pod2man(1) manual for more
+    % clivescan --manual
+    % pod2man clivefeed > clivefeed.1 # See pod2man(1) manual for more
+    % pod2man clivescan > clivescan.1 # See pod2man(1) manual for more
