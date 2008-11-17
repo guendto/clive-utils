@@ -48,3 +48,47 @@ Getting started:
     % clivescan --manual
     % pod2man clivefeed > clivefeed.1 # See pod2man(1) manual for more
     % pod2man clivescan > clivescan.1 # See pod2man(1) manual for more
+
+
+Installation: FreeBSD (7.0)
+------------------------------------------------------------------------------
+
+From the ports:
+  * x11-toolkits/p5-Tk-FontDialog
+  * textproc/p5-XML-RSS-LibXML
+  * security/p5-Digest-SHA
+  * devel/p5-Config-Tiny
+  * x11-toolkits/p5-Tk
+  * www/p5-HTML-Parser
+  * www/p5-HTML-Strip
+  * net/p5-URI
+  * ftp/curl
+  -- Optional:
+  * x11/p5-Clipboard
+
+From CPAN:
+  * WWW::Curl
+
+
+Installation: Ubuntu (Hardy)
+------------------------------------------------------------------------------
+
+From apt: # Typically: "sudo apt-get install $module"
+  * libcurl4-openssl-dev
+  * libhtml-parser-perl
+  * libconfig-tiny-perl
+  * libdigest-sha-perl
+  * libfile-spec-perl
+  * liburi-perl 
+  * perl-doc
+  * perl-tk
+  -- Optional:
+  * xclip (for Clipboard module below)
+
+From CPAN: # Typically: "sudo cpan install $module"
+  * WWW::Curl
+  * HTML::Strip
+  * XML::RSS::LibXML
+  * Tk::FontDialog
+  -- Optional:
+  * Clipboard

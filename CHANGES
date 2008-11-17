@@ -16,6 +16,7 @@ Version 2.0beta2
    * Fixed Preferences / Mainfont
 
  Developer-visible changes:
+   * Updated INSTALL file with FreeBSD and Ubuntu details
    - clivefeed
    * Cleaned up some code
    * Added missing Tk::FontDialog prerequisite (--version, INSTALL)
