@@ -662,17 +662,17 @@ B<Basic Options>
 
 Show help and exit.
 
-=item B<--version>
+=item B<-v --version>
 
 Show version and exit.
 
-=item B<--clive=>I<path>
+=item B<-c --clive=>I<path>
 
 I<path> to L<clive(1)> command. If unspecified, clivescan will attempt to
 locate it in the $PATH. Additionally, the B<CLIVE_PATH> environment variable
 can be used. See also L</CONFIG>. 
 
-=item B<--opts=>I<opts>
+=item B<-o --opts=>I<opts>
 
 I<opts> to append to clive call. See L<clive(1)> for more on the available
 options.
