@@ -1,0 +1,272 @@
+#!/usr/bin/env perl
+# -*- coding: ascii -*-
+###########################################################################
+# clivepass, the login password utility for clive
+# Copyright (C) 2008 Toni Gundogdu.
+#
+# This file is part of clive-utils.
+#
+# clivepass is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# clivepass is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with clivepass.  If not, see <http://www.gnu.org/licenses/>.
+###########################################################################
+
+# Keep it simple.
+
+use warnings;
+use strict;
+
+binmode(STDOUT, ":utf8");
+
+use Digest::MD5 qw(md5_hex); #!bsd
+use Crypt::PasswdMD5;
+use Crypt::Twofish2;
+use MIME::Base64; #!bsd
+use Config::Tiny;
+use Crypt::Salt;
+# Core modules:
+use Getopt::Long qw(:config bundling);
+use File::Spec;
+use File::Find;
+use Pod::Usage;
+use Encode;
+
+# TODO: Add --manual and __END__
+# TODO: Add module prerequisites to INSTALL
+
+my $VERSION     = "2.0beta3";
+my $CONFIGDIR   = $ENV{CLIVEPASS_CONFIGDIR}
+    || File::Spec->catfile($ENV{HOME}, ".config/clivepass");
+my $PASSWDFILE  = File::Spec->catfile($CONFIGDIR, "passwd");
+
+my %opts;
+$opts{add}   = 0;
+$opts{manual}= 0;
+$opts{help}  = 0;
+
+GetOptions(\%opts,
+    'add|a', 'get|g=s', 'manual|m', 'help|h', 'version|v' => \&print_version,
+) or pod2usage(1);
+
+pod2usage(-exitstatus => 0, -verbose => 1) if $opts{help};
+pod2usage(-exitstatus => 0, -verbose => 2) if $opts{manual};
+
+main();
+
+sub main {
+    my $passwd = Config::Tiny->read($PASSWDFILE);
+    my $phrase_hash = $passwd->{_}->{phrase};
+
+    my %ctx = ! $phrase_hash
+        ? create_passwd($phrase_hash)
+        : verify_phrase($passwd, $phrase_hash);
+
+    my $key = md5_hex($ctx{phrase});
+
+    if      ( $opts{add} ) {
+        add_login(\%ctx, $key);
+    } elsif ( $opts{get} ) {
+        my $pwd = get_login(\%ctx, $key, $opts{get});
+        if ( $pwd ) {
+            print "found: $opts{get}=$pwd\n";
+        } else {
+            print STDERR "error: login not found\n";
+        }
+    } else {
+        list_logins(\%ctx, $key);
+    }
+}
+
+sub create_passwd {
+    my ( $phrase_hash ) = @_;
+
+    my $phrase;
+    $phrase = getpass("Enter passphrase: ") while ( ! $phrase );
+
+    my $passwd = Config::Tiny->new;
+    $passwd->{_}->{phrase} = unix_md5_crypt($phrase, salt(8));
+    $passwd->write($PASSWDFILE);
+
+    return ( passwd => $passwd, phrase => $phrase );
+}
+
+sub verify_phrase {
+    my ( $passwd, $phrase_hash ) = @_;
+
+    my $phrase;
+    $phrase = getpass("Enter passphrase: ") while ( ! $phrase );
+
+    if ( unix_md5_crypt($phrase, $phrase_hash) ne $phrase_hash ) {
+        print STDERR "invalid passphrase\n";
+        exit;
+    }
+    return ( passwd => $passwd, phrase => $phrase );
+}
+
+sub getpass {
+    system "stty -echo";
+    print shift;
+    chomp(my $passwd = <STDIN>);
+    print "\n";
+    system "stty echo";
+    return $passwd;
+}
+
+sub add_login {
+    my ($ctx, $key) = @_;
+
+    print "Enter username: ";
+    chomp(my $user = <STDIN>);
+
+    my $pwd = getpass("Enter password for $user: ");
+    $pwd = pack('a16', $pwd);
+
+    my $c = Crypt::Twofish2->new($key, Crypt::Twofish2::MODE_CBC);
+
+    $ctx->{passwd}->{login}->{$user} = encode_base64($c->encrypt($pwd));
+    $ctx->{passwd}->write($PASSWDFILE);
+}
+
+sub get_login {
+    my ($ctx, $key, $login) = @_;
+    foreach ( $ctx->{passwd}->{login} ) {
+        while ( my ($id, $pwd) = each(%{$_}) ) {
+            if ( $id eq $login ) {
+                my $c = Crypt::Twofish2->new($key, Crypt::Twofish2::MODE_CBC);
+                return $c->decrypt(decode_base64($pwd));
+            }
+        }
+    }
+}
+
+sub list_logins {
+    my ($ctx, $key) = @_;
+
+    foreach ( $ctx->{passwd}->{login} ) {
+        while ( my ($id, $pwd) = each(%{$_}) ) {
+            my $c = Crypt::Twofish2->new($key, Crypt::Twofish2::MODE_CBC);
+            print "$id = " . $c->decrypt(decode_base64($pwd)) . "\n";
+        }
+    }
+}
+
+sub print_version {
+    my $perl_v  = sprintf "%vd", $^V;
+    print
+"clivepass version $VERSION.  Copyright (C) 2008 Toni Gundogdu.
+
+Perl: $perl_v ($^O)
+Modules:
+  * MIME::Base64/$MIME::Base64::VERSION\t\t* Config::Tiny/$Config::Tiny::VERSION
+  * Crypt::Salt/$Crypt::Salt::VERSION\t\t* Digest::MD5/$Digest::MD5::VERSION
+  * Crypt::PasswdMD5/$Crypt::PasswdMD5::VERSION\t* Crypt::Twofish2/$Crypt::Twofish2::VERSION
+
+Core modules:
+  * Getopt::Long/$Getopt::Long::VERSION\t\t* Encode/$Encode::VERSION
+  * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
+  * Pod::Usage/$Pod::Usage::VERSION
+
+This program comes with ABSOLUTELY NO WARRANTY. You may redistribute copies of
+clivepass under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your option)
+any later version. You should have received a copy of the General Public License
+along with this program. If not, see http://www.gnu.org/licenses/.
+"; exit;
+}
+
+__END__
+
+=head1 NAME
+
+clivepass - the login password utility for clive
+
+=head1 SYNOPSIS
+
+clivepass [option]...
+
+=head1 DESCRIPTION
+
+clivepass is an utility that can be used to create and change passwords
+for websites used by L<clive(1)>. The passwords are encrypted and saved
+along with the username information. The access is restricted by using a
+passphrase.
+
+=head1 OPTIONS
+
+If the utility is started without any options, it will prompt for the
+passphrase and list all decrypted passwords to stdout.
+
+B<Basic Options>
+
+=over 4
+
+=item B<-h --help>
+
+Show help and exit.
+
+=item B<-v --version>
+
+Show version and exit.
+
+=item B<-a --add>
+
+Add a new password to the list.
+
+=item B<-g --get=>I<username>
+
+Return a decrypted password for the I<username> from the list.
+The information is printed to stdout.
+
+=back
+
+=head1 EXAMPLES
+
+=over 4
+
+=item % clivepass -a
+
+=item % clivepass -g myusername
+
+=back
+
+=head1 FILES
+
+By default, clivepass searches the ~/.config/clivepass directory for the
+password file. The B<CLIVEPASS_CONFIGDIR> environment variable can be used
+to override this behaviour.
+
+=over 4
+
+=item ~/.config/clivepass/passwd
+
+Password file. Contains the salted passphrase hash and login usernames and
+encrypted passwords.
+
+=head1 SEE ALSO
+
+L<clive(1)> L<clivescan(1)> L<clivefeed(1)>
+
+=head1 OTHER
+
+Project: http://googlecode.com/p/clive-utils/
+
+A clive-utils development repository can be obtained from:
+
+    % git clone git://repo.or.cz/clive-utils.git
+
+Patches welcome.
+
+=head1 AUTHOR
+
+Written by Toni Gundogdu <legatvs@gmail.com>
+
+=cut
