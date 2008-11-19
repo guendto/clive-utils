@@ -40,7 +40,6 @@ use File::Find;
 use Pod::Usage;
 use Encode;
 
-# TODO: Add --manual and __END__
 # TODO: Add module prerequisites to INSTALL
 
 my $VERSION     = "2.0beta3";
