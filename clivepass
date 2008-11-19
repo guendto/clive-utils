@@ -27,20 +27,18 @@ use strict;
 
 binmode(STDOUT, ":utf8");
 
-use Digest::MD5 qw(md5_hex); #!bsd
 use Crypt::PasswdMD5;
 use Crypt::Twofish2;
-use MIME::Base64; #!bsd
 use Config::Tiny;
 use Crypt::Salt;
 # Core modules:
+use Digest::MD5 qw(md5_hex);
+use MIME::Base64;
 use Getopt::Long qw(:config bundling);
 use File::Spec;
 use File::Find;
 use Pod::Usage;
 use Encode;
-
-# TODO: Add module prerequisites to INSTALL
 
 my $VERSION     = "2.0beta3";
 my $CONFIGDIR   = $ENV{CLIVEPASS_CONFIGDIR}
@@ -165,14 +163,14 @@ sub print_version {
 
 Perl: $perl_v ($^O)
 Modules:
-  * MIME::Base64/$MIME::Base64::VERSION\t\t* Config::Tiny/$Config::Tiny::VERSION
-  * Crypt::Salt/$Crypt::Salt::VERSION\t\t* Digest::MD5/$Digest::MD5::VERSION
   * Crypt::PasswdMD5/$Crypt::PasswdMD5::VERSION\t* Crypt::Twofish2/$Crypt::Twofish2::VERSION
+  * Crypt::Salt/$Crypt::Salt::VERSION\t\t* Config::Tiny/$Config::Tiny::VERSION
 
 Core modules:
   * Getopt::Long/$Getopt::Long::VERSION\t\t* Encode/$Encode::VERSION
   * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
-  * Pod::Usage/$Pod::Usage::VERSION
+  * Pod::Usage/$Pod::Usage::VERSION\t\t* Digest::MD5/$Digest::MD5::VERSION
+  * MIME::Base64/$MIME::Base64::VERSION
 
 This program comes with ABSOLUTELY NO WARRANTY. You may redistribute copies of
 clivepass under the terms of the GNU General Public License as published by the

@@ -8,7 +8,9 @@ Perl >= 5.8
   http://perl.org
 
 The following 3rd party perl modules are required. The versions
-are recommendations.
+are recommendations. Note that sime Unix/Linux distributions may
+package some of the Perl core modules separately. The core modules
+have not been listed below.
 
 Note that the Clipboard module is OPTIONAL.
 
@@ -29,6 +31,12 @@ clivescan
 * Tk::DialogBox/4.013         * Clipboard/0.09
 * Tk::FontDialog/0.15         * HTML::TokeParser/2.37
 
+clivepass
+---------
+
+* Crypt::PasswdMD5/1.3        * Crypt::Twofish2/1.01
+* Crypt::Salt/0.01            * Config::Tiny/2.12
+
 
 Installation
 ------------------------------------------------------------------------------
@@ -42,12 +50,16 @@ Run:
 
     % clivefeed [option]... [URL]...
     % clivescan [option]... [URL]...
+    % clivepass [option]...
 
 Getting started:
     % clivefeed --manual
     % clivescan --manual
+    % clivepass --manual
+
     % pod2man clivefeed > clivefeed.1 # See pod2man(1) manual for more
-    % pod2man clivescan > clivescan.1 # See pod2man(1) manual for more
+    % pod2man clivescan > clivescan.1 
+    % pod2man clivepass > clivepass.1 
 
 
 Installation: FreeBSD (7.0)
@@ -63,6 +75,11 @@ From the ports:
   * www/p5-HTML-Strip
   * net/p5-URI
   * ftp/curl
+  * security/p5-Crypt-PasswdMD5
+  * security/p5-Crypt-Twofish2
+  * security/p5-Crypt-Salt
+  * security/p5-Digest-MD5
+  * converters/p5-MIME-Base64
   -- Optional:
   * x11/p5-Clipboard
 
@@ -82,6 +99,8 @@ From apt: # Typically: "sudo apt-get install $module"
   * liburi-perl 
   * perl-doc
   * perl-tk
+  * libmd5-perl
+  * libemail-mime-encodings-perl
   -- Optional:
   * xclip (for Clipboard module below)
 
@@ -90,5 +109,8 @@ From CPAN: # Typically: "sudo cpan install $module"
   * HTML::Strip
   * XML::RSS::LibXML
   * Tk::FontDialog
+  * Crypt::PasswdMD5
+  * Crypt::Twofish2
+  * Crypt::Salt
   -- Optional:
   * Clipboard
