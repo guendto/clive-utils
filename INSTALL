@@ -1,16 +1,23 @@
 Prerequisites
 ------------------------------------------------------------------------------
 
-clive >= 2.0beta1
-  http://clive.sf.net
+clive >= 2.0beta1 (http://clive.sf.net)
+Perl >= 5.8 (http://perl.org)
 
-Perl >= 5.8
-  http://perl.org
+The following 3rd party perl modules are required. The versions are
+recommendations. The module lists below are more or less comprehensive.
+The required Perl core modules have not been listed below.
 
-The following 3rd party perl modules are required. The versions
-are recommendations. Note that sime Unix/Linux distributions may
-package some of the Perl core modules separately. The core modules
-have not been listed below.
+Note that some Unix/Linux distributions may pack some of the Perl core modules
+separately and require them to be installed separately. This means also that
+the actual installation procedure may vary greatly for each distro.
+
+The FreeBSD and Ubuntu details further below are likely to be inaccurate and
+missing some steps. The information was mainly gathered to aid the current
+and future clive package maintainers to get started. Note that the CPAN
+installation steps exist only if the distro does not have the equivalent
+package or a version available. For example, the 3.x of WWW::Curl kept
+refusing to work with the current version of clive.
 
 Note that the Clipboard module is OPTIONAL.
 
@@ -80,6 +87,7 @@ From the ports:
   * security/p5-Crypt-Salt
   * security/p5-Digest-MD5
   * converters/p5-MIME-Base64
+  * devel/p5-File-Path
   -- Optional:
   * x11/p5-Clipboard
 
@@ -101,6 +109,7 @@ From apt: # Typically: "sudo apt-get install $module"
   * perl-tk
   * libmd5-perl
   * libemail-mime-encodings-perl
+  * libio-all-perl
   -- Optional:
   * xclip (for Clipboard module below)
 

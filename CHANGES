@@ -8,6 +8,9 @@ Version 2.0beta3
  User-visible changes:
    * Added clivepass utility
 
+ Developer-visible changes:
+   * Updated INSTALL
+
 
 Version 2.0beta2
 (November 17, 2008)
