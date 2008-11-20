@@ -22,6 +22,11 @@
 
 # Keep it simple.
 
+# TODO: Change default behaviour to print help instead of listing users
+# TODO: Implement --show|s
+# TODO: Loop STDIN prompts if empty strings
+# TODO: Implement passphrase and password confirmation
+
 use warnings;
 use strict;
 
@@ -89,6 +94,9 @@ sub main {
 sub create_passwd {
     my ( $phrase_hash ) = @_;
 
+    print "Creating $PASSWDFILE.\n";
+    $opts{add} = 1; # Set flag
+
     my $phrase;
     $phrase = getpass("Enter passphrase: ") while ( ! $phrase );
 
@@ -129,7 +137,7 @@ sub getpass {
 sub add_login {
     my ($ctx, $key) = @_;
 
-    print "Enter username: ";
+    print "Adding a new user.\nEnter username: ";
     chomp(my $user = <STDIN>);
 
     my $pwd = getpass("Enter password for $user: ");
