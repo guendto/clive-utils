@@ -37,6 +37,7 @@ use MIME::Base64;
 use Getopt::Long qw(:config bundling);
 use File::Spec;
 use File::Find;
+use File::Path;
 use Pod::Usage;
 use Encode;
 
@@ -60,6 +61,8 @@ pod2usage(-exitstatus => 0, -verbose => 2) if $opts{manual};
 main();
 
 sub main {
+    mkpath( [$CONFIGDIR], 1, 0700 );
+
     my $passwd = Config::Tiny->read($PASSWDFILE);
     my $phrase_hash = $passwd->{_}->{phrase};
 
@@ -110,11 +113,16 @@ sub verify_phrase {
 }
 
 sub getpass {
-    system "stty -echo";
-    print shift;
+    if ( -t STDOUT ) {
+        system "stty -echo";
+        print shift;
+    }
     chomp(my $passwd = <STDIN>);
-    print "\n";
-    system "stty echo";
+
+    if ( -t STDOUT ) {
+        print "\n";
+        system "stty echo";
+    }
     return $passwd;
 }
 
