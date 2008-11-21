@@ -111,7 +111,7 @@ sub verify_phrase {
 sub get_key {
     my ($dupl_user) = @_;
 
-    print STDERR "error: $PASSWDFILE does not exist, use --create"
+    print STDERR "error: $PASSWDFILE does not exist, use --create\n"
         and exit if ( ! -e $PASSWDFILE );
 
     my $passwd = Config::Tiny->read($PASSWDFILE);
@@ -119,7 +119,7 @@ sub get_key {
     if ( $dupl_user ) {
         my ($id, $pwd) = lookup_login($passwd, $dupl_user);
         print STDERR qq/error: login with the "$dupl_user" /
-            . "username exists already" and exit if $pwd;
+            . "username exists already\n" and exit if $pwd;
     }
 
     my $phrase = verify_phrase($passwd->{_}->{phrase});
@@ -171,7 +171,7 @@ sub edit_login {
     my ($id, $pwd) = lookup_login($passwd, $opts{edit});
 
     print STDERR qq/error: no such login with the "$opts{edit}" /
-        . "username exists" and exit unless $pwd;
+        . "username exists\n" and exit unless $pwd;
 
     print "WARN: Changing password for the login "
         . qq/with the username "$id".\n/;
@@ -184,7 +184,7 @@ sub get_login {
     my ($id, $pwd) = lookup_login($passwd, $opts{get});
 
     print STDERR qq/error: no such login with the "$opts{get}" /
-        . "username exists" and exit unless $pwd;
+        . "username exists\n" and exit unless $pwd;
 
     my $c = Crypt::Twofish2->new($key, Crypt::Twofish2::MODE_CBC);
     print "login: " .$opts{get}."=". $c->decrypt(decode_base64($pwd));
@@ -195,7 +195,7 @@ sub delete_login {
     my ($id, $pwd) = lookup_login($passwd, $opts{delete});
 
     print STDERR qq/error: no such login with the "$opts{delete}" /
-        . "username exists" and exit unless $pwd;
+        . "username exists\n" and exit unless $pwd;
 
     print "WARN: About to delete the login with the username "
         . qq/"$id".\n/ ."> Confirm delete (y/N): ";
