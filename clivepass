@@ -22,6 +22,9 @@
 
 # Keep it simple.
 
+# TODO: Implement --show (usernames only)
+# TODO: Document --show
+
 use warnings;
 use strict;
 
@@ -187,7 +190,7 @@ sub get_login {
         . "username exists\n" and exit unless $pwd;
 
     my $c = Crypt::Twofish2->new($key, Crypt::Twofish2::MODE_CBC);
-    print "login: " .$opts{get}."=". $c->decrypt(decode_base64($pwd));
+    print "login: " .$opts{get}."=". $c->decrypt(decode_base64($pwd)) ."\n";
 }
 
 sub delete_login {
