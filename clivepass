@@ -22,9 +22,6 @@
 
 # Keep it simple.
 
-# TODO: Document --add, --create, --edit and --delete
-# TODO: Add history to manual page DESCRIPTION
-
 use warnings;
 use strict;
 
@@ -260,8 +257,11 @@ clivepass [option]...
 
 clivepass is an utility that can be used to create and change passwords
 for websites used by L<clive(1)>. The passwords are encrypted and saved
-along with the username information. The access is restricted by using a
-passphrase.
+along with the username information. Access is restricted by using a
+global passphrase.
+
+Historically, a similar utility, clive-passwd, was part of clive 1.x but
+was written in Python instead of Perl.
 
 =head1 OPTIONS
 
@@ -277,14 +277,26 @@ Show help and exit.
 
 Show version and exit.
 
-=item B<-a --add>
+=item B<-c --create>
 
-Add a new password to the list.
+Create a new passwd file. See also L</FILES>.
+
+=item B<-a --add=>I<username>
+
+Add a new login with the I<username>.
+
+=item B<-e --edit=>I<username>
+
+Change login password for I<username>.
 
 =item B<-g --get=>I<username>
 
-Return a decrypted password for the I<username> from the list.
-The information is printed to stdout.
+Print the decrypted login password for the I<username>
+to STDOUT.
+
+=item B<-d --delete=>I<username>
+
+Delete the login with the I<username>.
 
 =back
 
@@ -292,7 +304,7 @@ The information is printed to stdout.
 
 =over 4
 
-=item % clivepass -a
+=item % clivepass -a myusername
 
 =item % clivepass -g myusername
 
