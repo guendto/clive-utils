@@ -22,10 +22,8 @@
 
 # Keep it simple.
 
-# TODO: Change default behaviour to print help instead of listing users
-# TODO: Implement --show|s
-# TODO: Loop STDIN prompts if empty strings
-# TODO: Implement passphrase and password confirmation
+# TODO: Document --add, --create, --edit and --delete
+# TODO: Add history to manual page DESCRIPTION
 
 use warnings;
 use strict;
@@ -52,12 +50,9 @@ my $CONFIGDIR   = $ENV{CLIVEPASS_CONFIGDIR}
 my $PASSWDFILE  = File::Spec->catfile($CONFIGDIR, "passwd");
 
 my %opts;
-$opts{add}   = 0;
-$opts{manual}= 0;
-$opts{help}  = 0;
-
 GetOptions(\%opts,
-    'add|a', 'get|g=s', 'manual|m', 'help|h', 'version|v' => \&print_version,
+    'create|c', 'add|a=s', 'get|g=s', 'edit|e=s', 'delete|d=s',
+    'manual|m', 'help|h', 'version|v' => \&print_version,
 ) or pod2usage(1);
 
 pod2usage(-exitstatus => 0, -verbose => 1) if $opts{help};
@@ -68,37 +63,30 @@ main();
 sub main {
     mkpath( [$CONFIGDIR], 1, 0700 );
 
-    my $passwd = Config::Tiny->read($PASSWDFILE);
-    my $phrase_hash = $passwd->{_}->{phrase};
-
-    my %ctx = ! $phrase_hash
-        ? create_passwd($phrase_hash)
-        : verify_phrase($passwd, $phrase_hash);
-
-    my $key = md5_hex($ctx{phrase});
-
-    if      ( $opts{add} ) {
-        add_login(\%ctx, $key);
-    } elsif ( $opts{get} ) {
-        my $pwd = get_login(\%ctx, $key, $opts{get});
-        if ( $pwd ) {
-            print "found: $opts{get}=$pwd\n";
-        } else {
-            print STDERR "error: login not found\n";
-        }
-    } else {
-        list_logins(\%ctx, $key);
+    if    ( $opts{add} )    { add_login(); }
+    elsif ( $opts{create} ) { create_passwd(); }
+    elsif ( $opts{edit} )   { edit_login(); }
+    elsif ( $opts{delete} ) { delete_login(); }
+    elsif ( $opts{get} )    { get_login(); }
+    else {
+        pod2usage(-exitstatus => 0, -verbose => 1);
     }
 }
 
 sub create_passwd {
-    my ( $phrase_hash ) = @_;
-
+    if ( -e $PASSWDFILE ) {
+        print "WARN: $PASSWDFILE exists already.\n"
+            . "WARN: You are about to overwrite the existing file.\n"
+            . "WARN: Hit ctrl-c now if that's not your intention.\n";
+    }
     print "Creating $PASSWDFILE.\n";
-    $opts{add} = 1; # Set flag
 
-    my $phrase;
+    my ($phrase, $again);
     $phrase = getpass("Enter passphrase: ") while ( ! $phrase );
+    $again = getpass("Enter passphrase again: ") while ( ! $again );
+
+    print STDERR "error: passphrases did not match\n" and exit
+        unless $phrase eq $again;
 
     my $passwd = Config::Tiny->new;
     $passwd->{_}->{phrase} = unix_md5_crypt($phrase, salt(8));
@@ -108,17 +96,41 @@ sub create_passwd {
 }
 
 sub verify_phrase {
-    my ( $passwd, $phrase_hash ) = @_;
+    my ($phrase_hash) = @_;
+
+    print STDERR "error: $PASSWDFILE: phrase hash not found\n" and exit
+        unless $phrase_hash;
 
     my $phrase;
     $phrase = getpass("Enter passphrase: ") while ( ! $phrase );
 
     if ( unix_md5_crypt($phrase, $phrase_hash) ne $phrase_hash ) {
-        print STDERR "invalid passphrase\n";
+        print STDERR "error: invalid passphrase\n";
         exit;
     }
-    return ( passwd => $passwd, phrase => $phrase );
+    return $phrase;
 }
+
+sub get_key {
+    my ($dupl_user) = @_;
+
+    print STDERR "error: $PASSWDFILE does not exist, use --create"
+        and exit if ( ! -e $PASSWDFILE );
+
+    my $passwd = Config::Tiny->read($PASSWDFILE);
+
+    if ( $dupl_user ) {
+        my ($id, $pwd) = lookup_login($passwd, $dupl_user);
+        print STDERR qq/error: login with the "$dupl_user" /
+            . "username exists already" and exit if $pwd;
+    }
+
+    my $phrase = verify_phrase($passwd->{_}->{phrase});
+    my $key = md5_hex($phrase);
+
+    return ($key, $passwd);
+}
+
 
 sub getpass {
     if ( -t STDOUT ) {
@@ -134,40 +146,78 @@ sub getpass {
     return $passwd;
 }
 
-sub add_login {
-    my ($ctx, $key) = @_;
+sub new_login {
+    my ($key, $passwd, $user) = @_;
 
-    print "Adding a new user.\nEnter username: ";
-    chomp(my $user = <STDIN>);
+    my ($pwd, $again);
+    $pwd = getpass("Enter password for $user: ") while ( ! $pwd );
+    $again = getpass("Re-enter the password: ") while ( ! $again );
 
-    my $pwd = getpass("Enter password for $user: ");
-    $pwd = pack('a16', $pwd);
+    print STDERR "error: passwords did not match\n" and exit
+        unless $pwd eq $again;
 
     my $c = Crypt::Twofish2->new($key, Crypt::Twofish2::MODE_CBC);
 
-    $ctx->{passwd}->{login}->{$user} = encode_base64($c->encrypt($pwd));
-    $ctx->{passwd}->write($PASSWDFILE);
+    $passwd->{login}->{$user} =
+        encode_base64( $c->encrypt( pack('a16',$pwd) ) );
+
+    $passwd->write($PASSWDFILE);
+}
+
+sub add_login {
+    my ($key, $passwd) = get_key($opts{add});
+    new_login($key, $passwd, $opts{add});
+}
+
+sub edit_login {
+    my ($key, $passwd) = get_key();
+    my ($id, $pwd) = lookup_login($passwd, $opts{edit});
+
+    print STDERR qq/error: no such login with the "$opts{edit}" /
+        . "username exists" and exit unless $pwd;
+
+    print "WARN: Changing password for the login "
+        . qq/with the username "$id".\n/;
+
+    new_login($key, $passwd, $id);
 }
 
 sub get_login {
-    my ($ctx, $key, $login) = @_;
-    foreach ( $ctx->{passwd}->{login} ) {
-        while ( my ($id, $pwd) = each(%{$_}) ) {
-            if ( $id eq $login ) {
-                my $c = Crypt::Twofish2->new($key, Crypt::Twofish2::MODE_CBC);
-                return $c->decrypt(decode_base64($pwd));
-            }
-        }
-    }
+    my ($key, $passwd) = get_key();
+    my ($id, $pwd) = lookup_login($passwd, $opts{get});
+
+    print STDERR qq/error: no such login with the "$opts{get}" /
+        . "username exists" and exit unless $pwd;
+
+    my $c = Crypt::Twofish2->new($key, Crypt::Twofish2::MODE_CBC);
+    print "login: " .$opts{get}."=". $c->decrypt(decode_base64($pwd));
 }
 
-sub list_logins {
-    my ($ctx, $key) = @_;
+sub delete_login {
+    my ($key, $passwd) = get_key();
+    my ($id, $pwd) = lookup_login($passwd, $opts{delete});
 
-    foreach ( $ctx->{passwd}->{login} ) {
+    print STDERR qq/error: no such login with the "$opts{delete}" /
+        . "username exists" and exit unless $pwd;
+
+    print "WARN: About to delete the login with the username "
+        . qq/"$id".\n/ ."> Confirm delete (y/N): ";
+
+    chomp(my $confirm = <STDIN>);
+    exit unless $confirm eq "y";
+
+    delete $passwd->{login}->{$id};
+    $passwd->write($PASSWDFILE);
+}
+
+sub lookup_login {
+    my ($passwd, $user) = @_;
+
+    foreach ( $passwd->{login} ) {
         while ( my ($id, $pwd) = each(%{$_}) ) {
-            my $c = Crypt::Twofish2->new($key, Crypt::Twofish2::MODE_CBC);
-            print "$id = " . $c->decrypt(decode_base64($pwd)) . "\n";
+            if ( $id eq $user ) {
+                return ($id,$pwd);
+            }
         }
     }
 }
@@ -214,9 +264,6 @@ along with the username information. The access is restricted by using a
 passphrase.
 
 =head1 OPTIONS
-
-If the utility is started without any options, it will prompt for the
-passphrase and list all decrypted passwords to stdout.
 
 B<Basic Options>
 
