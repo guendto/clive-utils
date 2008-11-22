@@ -50,7 +50,7 @@ use Cwd;
 my %opted_mods = (Clipboard => 1);
 eval "use Clipboard"; $opted_mods{Clipboard}=0 if $@;
 
-my $VERSION     = "2.0beta2";
+my $VERSION     = "2.0beta3";
 my $CONFIGDIR   = $ENV{CLIVEFEED_CONFIGDIR}
     || File::Spec->catfile($ENV{HOME}, ".config/clivefeed"); 
 my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
