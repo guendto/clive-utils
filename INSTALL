@@ -64,9 +64,9 @@ Getting started:
     % clivescan --manual
     % clivepass --manual
 
-    % pod2man clivefeed > clivefeed.1 # See pod2man(1) manual for more
-    % pod2man clivescan > clivescan.1 
-    % pod2man clivepass > clivepass.1 
+The manual pages is written in Perl Pod markup language and they are embedded
+in the script files. See "perldoc perlpod" for more info. For example:
+    % pod2man clivefeed > clivefeed.1
 
 
 Installation: FreeBSD (7.0)
