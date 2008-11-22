@@ -225,16 +225,16 @@ sub scan_page {
             search_for => qr|\Q/googleplayer.swf?docid=\E(.*?)["< &]|i,
             url_prefix => "http://video.google.com/videoplay?docid=",
         },
-        Metacafe => { # NOTE: metacafe.com/watch/$id is enough for redirect
-            in_scanurl => qr|\Qmetacafe.com\E|i,
-            search_for => qr|\Q/watch/\E(.*?)/|i,
-            url_prefix => "http://metacafe.com/watch/",
-        },
-        MetacafeEmbed => {
-            in_scanurl => undef,
-            search_for => qr|\Qmetacafe.com/fplayer/\E(.*?)/|i,
-            url_prefix => "http://metacafe.com/watch/",
-        },
+#        Metacafe => { # NOTE: metacafe.com/watch/$id is enough for redirect
+#            in_scanurl => qr|\Qmetacafe.com\E|i,
+#            search_for => qr|\Q/watch/\E(.*?)/|i,
+#            url_prefix => "http://metacafe.com/watch/",
+#        },
+#        MetacafeEmbed => {
+#            in_scanurl => undef,
+#            search_for => qr|\Qmetacafe.com/fplayer/\E(.*?)/|i,
+#            url_prefix => "http://metacafe.com/watch/",
+#        },
         SevenLoad => { # NOTE: Ditto. Subdomain can be ignored.
             in_scanurl => qr|\Qsevenload.com\E|i,
             search_for => qr|\Q/videos/\E(.*?)\-|i,
