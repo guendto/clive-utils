@@ -1,15 +1,19 @@
-clive-utils-CHANGES
-
-TODO: clivescan: Add support for Break.com embedded URLs (see src for notes)
-
-
 Version 2.0beta3
+(November 22, 2008)
+
+ Notes:
+   This aims to be the last beta before the release of 2.0 in December 2008.
+   Please report any remaining bugs to the issue tracker at:
+     http://code.google.com/p/clive-utils/issues/list
 
  User-visible changes:
    * Added clivepass utility
+   - clivescan
+   * Removed Metacafe support (reflects the changes in clive project)
 
  Developer-visible changes:
-   * Updated INSTALL
+   * Added TODO file
+   * Rewrote portions of INSTALL
 
 
 Version 2.0beta2
