@@ -22,9 +22,6 @@
 
 # Keep it simple.
 
-# TODO: Implement --show (usernames only)
-# TODO: Document --show
-
 use warnings;
 use strict;
 
@@ -51,8 +48,8 @@ my $PASSWDFILE  = File::Spec->catfile($CONFIGDIR, "passwd");
 
 my %opts;
 GetOptions(\%opts,
-    'create|c', 'add|a=s', 'get|g=s', 'edit|e=s', 'delete|d=s',
-    'manual|m', 'help|h', 'version|v' => \&print_version,
+    'create|c', 'add|a=s',  'get|g=s', 'edit|e=s', 'delete|d=s',
+    'show|s',   'manual|m', 'help|h',  'version|v' => \&print_version,
 ) or pod2usage(1);
 
 pod2usage(-exitstatus => 0, -verbose => 1) if $opts{help};
@@ -68,6 +65,7 @@ sub main {
     elsif ( $opts{edit} )   { edit_login(); }
     elsif ( $opts{delete} ) { delete_login(); }
     elsif ( $opts{get} )    { get_login(); }
+    elsif ( $opts{show} )   { show_logins(); }
     else {
         pod2usage(-exitstatus => 0, -verbose => 1);
     }
@@ -193,6 +191,15 @@ sub get_login {
     print "login: " .$opts{get}."=". $c->decrypt(decode_base64($pwd)) ."\n";
 }
 
+sub show_logins {
+    my $passwd = Config::Tiny->read($PASSWDFILE);
+    foreach ( $passwd->{login} ) {
+        while ( my ($id, $pwd) = each(%{$_}) ) {
+            printf "%20s = %-32s\n", $id, $pwd;
+        }
+    }
+}
+
 sub delete_login {
     my ($key, $passwd) = get_key();
     my ($id, $pwd) = lookup_login($passwd, $opts{delete});
@@ -296,6 +303,10 @@ Change login password for I<username>.
 
 Print the decrypted login password for the I<username>
 to STDOUT.
+
+=item B<-s --show>
+
+Show all saved login usernames with encrypted passwords.
 
 =item B<-d --delete=>I<username>
 
