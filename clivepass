@@ -41,7 +41,7 @@ use File::Path;
 use Pod::Usage;
 use Encode;
 
-my $VERSION     = "2.0beta3";
+my $VERSION     = "2.0.0";
 my $CONFIGDIR   = $ENV{CLIVEPASS_CONFIGDIR}
     || File::Spec->catfile($ENV{HOME}, ".config/clivepass");
 my $PASSWDFILE  = File::Spec->catfile($CONFIGDIR, "passwd");
