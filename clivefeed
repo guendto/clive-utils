@@ -139,7 +139,7 @@ sub fetch_feed {
     my ($url, $response, $rc) = (shift, "", 0);
     open my $rfh, ">", \$response;
 
-    print "Fetching $url ..." unless $opts{quiet};
+    print "[fetch] $url ..." unless $opts{quiet};
     $curl->setopt(CURLOPT_URL, $url);
     $curl->setopt(CURLOPT_ENCODING, "");
     $curl->setopt(CURLOPT_WRITEDATA, $rfh);
@@ -150,7 +150,7 @@ sub fetch_feed {
         print "done.\n" unless $opts{quiet};
         process_feed($url, $response);
     } else {
-        print STDERR "\nerror: " .$curl->strerror($rc)." (http/$rc)\n";
+        print STDERR "\n[error] " .$curl->strerror($rc)." (http/$rc)\n";
     }
     close $rfh;
 }
@@ -160,7 +160,7 @@ sub fetch_feed {
 
 sub get_queue {
     if ( $opts{paste} ) {
-        print STDERR "error: Clipboard module not found" and exit
+        print STDERR "[error] Clipboard module not found" and exit
             unless $opted_mods{Clipboard};
         my $data = Clipboard->paste();
         if ( $data ) {
@@ -182,7 +182,7 @@ sub process_queue {
 
 sub process_feed {
     my ($url, $response) = @_;
-    print "=> Processing feed ..." unless $opts{quiet};
+    print "=> [process] feed ..." unless $opts{quiet};
 
     my $rss = XML::RSS::LibXML->new;
     $rss->parse($response);
@@ -215,13 +215,13 @@ sub parse_input {
 }
 
 sub find_clive {
-    print "Trying to locate 'clive' ..." unless $opts{quiet};
+    print "[locate] clive ..." unless $opts{quiet};
 
     find ( sub { $opts{clive} = $File::Find::name if ( $_ eq 'clive' ) },
         split /:/, $ENV{PATH} || getcwd);
 
     if   ( $opts{clive} ) { print "$opts{clive}\n" unless $opts{quiet}; }
-    else { print STDERR "error: not found, use --clive=path\n"; exit; }
+    else { print STDERR "\n[error] not found, use --clive=path\n"; exit; }
 }
 
 sub run_clive {

@@ -152,7 +152,7 @@ sub fetch_page {
 
 sub get_queue {
     if ( $opts{paste} ) {
-        print STDERR "error: Clipboard module not found" and exit
+        print STDERR "[error] Clipboard module not found" and exit
             unless $opted_mods{Clipboard};
         my $data = Clipboard->paste();
         if ( $data ) {
@@ -170,7 +170,7 @@ sub get_queue {
 sub process_queue {
     init_curl();
     foreach ( @queue ) {
-        print "Fetching $_ ..." unless $opts{quiet};
+        print "[fetch] $_ ..." unless $opts{quiet};
         my ($rc, $fh, $resp, $errmsg) = fetch_page($_);
         if ( $rc == 0 ) {
             $rc = $curl->getinfo(CURLINFO_RESPONSE_CODE);
@@ -183,7 +183,7 @@ sub process_queue {
             $errmsg = $curl->strerror($rc)." (http/$rc)";
         }
         close $fh;
-        print STDERR "\n==> error: $errmsg\n" if $errmsg;
+        print STDERR "\n==> [error] $errmsg\n" if $errmsg;
     }
 }
 
@@ -255,7 +255,7 @@ sub scan_page {
         # Embed URL: http://embed.break.com/600081
     );
 
-    print "=> Scanning page for links " unless $opts{quiet};
+    print "=> [scan] page" unless $opts{quiet};
 
     sub _scan_progress {
         my ($linksref, $link) = @_;
@@ -278,12 +278,12 @@ sub scan_page {
     my %h = map { $_, 1 } @links; # Weed out duplicates
     @links = keys %h;
 
-    print "\n=> Found " .scalar @links. " links after removing duplicates.\n"
+    print " found " .scalar @links. " link(s).\n"
         unless $opts{quiet};
 
     my %verified_links;
     foreach my $link ( @links ) {
-        print "==> Fetching $link ..." unless $opts{quiet};
+        print "==> [fetch] $link ..." unless $opts{quiet};
         my ($rc, $fh, $resp, $errmsg) = fetch_page($link);
         if ( $rc == 0 ) {
             $rc = $curl->getinfo(CURLINFO_RESPONSE_CODE);
@@ -304,7 +304,7 @@ sub scan_page {
             $errmsg = $curl->strerror($rc)." (http/$rc)";
         }
         close $fh;
-        print STDERR "\n==> error: $errmsg\n" if $errmsg;
+        print STDERR "\n==> [error] $errmsg\n" if $errmsg;
     }
 
     $found_queue{ sha1_hex($scanurl) } =
@@ -336,13 +336,13 @@ sub parse_input {
 }
 
 sub find_clive {
-    print "Trying to locate 'clive' ..." unless $opts{quiet};
+    print "[locate] clive ..." unless $opts{quiet};
 
     find ( sub { $opts{clive} = $File::Find::name if ( $_ eq 'clive' ) },
         split /:/, $ENV{PATH} || getcwd);
 
     if   ( $opts{clive} ) { print "$opts{clive}\n" unless $opts{quiet}; }
-    else { print STDERR "error: not found, use --clive=path\n"; exit; }
+    else { print STDERR "\n[error] not found, use --clive=path\n"; exit; }
 }
 
 sub run_clive {
