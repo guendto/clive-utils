@@ -1,8 +1,8 @@
 Version 2.0
 
  User-visible changes:
-   * Changed status messages to "[$verb] $msg" format
    - clivepass
+   * Added a weak passphrase warning
    * Added --show option
 
 

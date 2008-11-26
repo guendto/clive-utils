@@ -80,10 +80,12 @@ sub create_passwd {
     print "Creating $PASSWDFILE.\n";
 
     my ($phrase, $again);
-    $phrase = getpass("Enter passphrase: ") while ( ! $phrase );
-    $again = getpass("Enter passphrase again: ") while ( ! $again );
+    $phrase = getpass("Enter a new passphrase: ") while ( ! $phrase );
+    print "WARN: Consider using a longer passphrase.\n"
+        if ( length($phrase) < 8 );
+    $again = getpass("Re-enter the passphrase: ") while ( ! $again );
 
-    print STDERR "[error] passphrases did not match\n" and exit
+    print STDERR "error: passphrases did not match\n" and exit
         unless $phrase eq $again;
 
     my $passwd = Config::Tiny->new;
@@ -96,14 +98,14 @@ sub create_passwd {
 sub verify_phrase {
     my ($phrase_hash) = @_;
 
-    print STDERR "[error] $PASSWDFILE: phrase hash not found\n" and exit
+    print STDERR "error: $PASSWDFILE: phrase hash not found\n" and exit
         unless $phrase_hash;
 
     my $phrase;
     $phrase = getpass("Enter passphrase: ") while ( ! $phrase );
 
     if ( unix_md5_crypt($phrase, $phrase_hash) ne $phrase_hash ) {
-        print STDERR "[error] invalid passphrase\n";
+        print STDERR "error: invalid passphrase\n";
         exit;
     }
     return $phrase;
@@ -112,14 +114,14 @@ sub verify_phrase {
 sub get_key {
     my ($dupl_user) = @_;
 
-    print STDERR "[error] $PASSWDFILE does not exist, use --create\n"
+    print STDERR "error: $PASSWDFILE does not exist, use --create\n"
         and exit if ( ! -e $PASSWDFILE );
 
     my $passwd = Config::Tiny->read($PASSWDFILE);
 
     if ( $dupl_user ) {
         my ($id, $pwd) = lookup_login($passwd, $dupl_user);
-        print STDERR qq/[error] login with the "$dupl_user" /
+        print STDERR qq/error: login with the "$dupl_user" /
             . "username exists already\n" and exit if $pwd;
     }
 
@@ -151,7 +153,7 @@ sub new_login {
     $pwd = getpass("Enter password for $user: ") while ( ! $pwd );
     $again = getpass("Re-enter the password: ") while ( ! $again );
 
-    print STDERR "[error] passwords did not match\n" and exit
+    print STDERR "error: passwords did not match\n" and exit
         unless $pwd eq $again;
 
     my $c = Crypt::Twofish2->new($key, Crypt::Twofish2::MODE_CBC);
@@ -171,7 +173,7 @@ sub edit_login {
     my ($key, $passwd) = get_key();
     my ($id, $pwd) = lookup_login($passwd, $opts{edit});
 
-    print STDERR qq/[error] no such login with the "$opts{edit}" /
+    print STDERR qq/error: no such login with the "$opts{edit}" /
         . "username exists\n" and exit unless $pwd;
 
     print "WARN: Changing password for the login "
@@ -184,7 +186,7 @@ sub get_login {
     my ($key, $passwd) = get_key();
     my ($id, $pwd) = lookup_login($passwd, $opts{get});
 
-    print STDERR qq/[error] no such login with the "$opts{get}" /
+    print STDERR qq/error: no such login with the "$opts{get}" /
         . "username exists\n" and exit unless $pwd;
 
     my $c = Crypt::Twofish2->new($key, Crypt::Twofish2::MODE_CBC);
@@ -204,7 +206,7 @@ sub delete_login {
     my ($key, $passwd) = get_key();
     my ($id, $pwd) = lookup_login($passwd, $opts{delete});
 
-    print STDERR qq/[error] no such login with the "$opts{delete}" /
+    print STDERR qq/error: no such login with the "$opts{delete}" /
         . "username exists\n" and exit unless $pwd;
 
     print "WARN: About to delete the login with the username "
