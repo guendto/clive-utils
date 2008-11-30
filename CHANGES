@@ -1,9 +1,17 @@
-Version 2.0
+Version 2.0.0
 
  User-visible changes:
+   - clivescan
+   * Added support for Lastfm wrapped Youtube links
+   * Fixed: GUI is no longer invoked if scan found 0 links
+   * Tweaked some messages
    - clivepass
    * Added a weak passphrase warning
    * Added --show option
+
+ Developer-visible changes:
+   - clivescan
+   * Fixed: decode_utf8($page) is now used to workaround utf8 issues in titles
 
 
 Version 2.0beta3

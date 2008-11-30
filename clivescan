@@ -144,7 +144,7 @@ sub fetch_page {
     $curl->setopt(CURLOPT_WRITEDATA, $fh);
     $rc = $curl->perform;
 
-    return ($rc, $fh, $resp);
+    return ($rc, $fh, decode_utf8($resp));
 }
 
 
@@ -245,6 +245,11 @@ sub scan_page {
             search_for => qr|\Qsevenload.com/pl/\E(.*?)/|i,
             url_prefix => "http://sevenload.com/videos/",
         },
+        LastfmYoutube => { # Lastfm wraps some of the Youtube videos
+            in_scanurl => qr|\Qlast.fm\E|i,
+            search_for => qr|\Q/+videos/\E\Q+1-\E(.*?)["< &#]|i,
+            url_prefix => "http://youtube.com/watch?v=",
+        },
         Break => {
             in_scanurl => qr|\Qbreak.com\E|i,
             search_for => qr|\Q/index/\E(.*?)["< &]|i,
@@ -255,7 +260,7 @@ sub scan_page {
         # Embed URL: http://embed.break.com/600081
     );
 
-    print "scan page" unless $opts{quiet};
+    print "scan " unless $opts{quiet};
 
     sub _scan_progress {
         my ($linksref, $link) = @_;
@@ -278,7 +283,7 @@ sub scan_page {
     my %h = map { $_, 1 } @links; # Weed out duplicates
     @links = keys %h;
 
-    print " removed duplicates. found " .scalar @links. " link(s).\n"
+    print "found " .scalar @links. " link(s).\n"
         unless $opts{quiet};
 
     my %verified_links;
@@ -289,12 +294,15 @@ sub scan_page {
             $rc = $curl->getinfo(CURLINFO_RESPONSE_CODE);
             if ( $rc == 0 or $rc == 200 ) {
                 print "done.\n" unless $opts{quiet};
+
                 # Grab title
                 $p = HTML::TokeParser->new(\$resp);
                 $p->get_tag("title");
                 my $title = $p->get_trimmed_text;
-                # Store, prevent link duplicates
+
+                # Store, skip if link exists already
                 my $sha1 = sha1_hex($link); 
+
                 $verified_links{$sha1} = {link => $link, title => $title}
                     unless defined $verified_links{$sha1};
             } else {
@@ -307,8 +315,12 @@ sub scan_page {
         print STDERR "\nerror: $errmsg\n" if $errmsg;
     }
 
-    $found_queue{ sha1_hex($scanurl) } =
-        { title => $pagetitle, url => $scanurl, videos => {%verified_links} };
+    if ( $pagetitle and scalar keys %verified_links > 0 ) {
+        $found_queue{ sha1_hex($scanurl) } = {
+            title => $pagetitle,
+            url => $scanurl, videos => {%verified_links}
+        };
+    }
 }
 
 sub grab_all {
@@ -383,7 +395,7 @@ print $s; exit;
 # GUI:
 
 sub init_gui {
-    return if keys %found_queue == 0;
+    return if scalar keys %found_queue == 0;
 
     $mw = MainWindow->new;
     $mw->geometry($opts{geometry}) if defined $opts{geometry};
