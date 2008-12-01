@@ -56,19 +56,19 @@ my $CONFIGDIR   = $ENV{CLIVEFEED_CONFIGDIR}
 my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
 my $PREFSFILE   = File::Spec->catfile($CONFIGDIR, "prefs");
 
-my %opts;       # Holds the options
-my @queue;      # Holds the current URL queue
-my $curl;       # Holds the curl handle (reused throught lifespan)
-my @channels;   # Holds parsed channel data
-my $mw;         # Holds the main window handle (GUI)
-my $pwmain;     # Holds the handle to the main paned window
-my $pwtop;      # Holds the handle to the top paned window
-my $pwbottom;   # Holds the handle to the bottom paned window
-my $lbchann;    # Listbox: channels
-my $lbitems;    # Listbox: (channel) items
-my $lbqueue;    # Listbox: queued video items
-my $txtdescr;   # Text: video description
-my %usersel;    # Holds user-selected videos
+my %opts;       # options
+my @queue;      # current URL queue
+my $curl;       # curl handle (reused throught lifespan)
+my @channels;   # parsed channel data
+my $mw;         # main window handle (GUI)
+my $pwmain;     # handle to the main paned window
+my $pwtop;      # handle to the top paned window
+my $pwbottom;   # handle to the bottom paned window
+my $lbchann;    # listbox: channels
+my $lbitems;    # listbox: (channel) items
+my $lbqueue;    # listbox: queued video items
+my $txtdescr;   # text: video description
+my %usersel;    # user-selected videos
 
 # Parse config
 my $conf = Config::Tiny->read($CONFIGFILE);
@@ -86,15 +86,6 @@ my $prefs = Config::Tiny->read($PREFSFILE);
     mainfont=> $prefs->{gui}->{mainfont},
 );
 
-# Parse cmdline
-# Define those not read from config, init with defaults
-$opts{quiet}    = 0;
-$opts{paste}    = 0;
-$opts{all}      = 0;
-$opts{debug}    = 0;
-$opts{help}     = 0;
-$opts{manual}   = 0;
-$opts{version}  = 0;
 $opts{mainfont} = $opts{mainfont} || "{helvetica} -12 bold";
 
 GetOptions(\%opts,
@@ -244,10 +235,10 @@ Modules:
   * Tk::DialogBox/$Tk::DialogBox::VERSION\t\t* HTML::Strip/$HTML::Strip::VERSION
   * Tk::FontDialog/$Tk::FontDialog::VERSION\t\t* Tk::Tree/$Tk::Tree::VERSION
 Core modules:
-  * Getopt::Long/$Getopt::Long::VERSION\t\t* Digest::SHA/$Digest::SHA::VERSION
+  * Getopt::Long/$Getopt::Long::VERSION\t\t* Cwd/$Cwd::VERSION
   * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
   * File::Path/$File::Path::VERSION\t\t* Encode/$Encode::VERSION
-  * Pod::Usage/$Pod::Usage::VERSION\t\t* Cwd/$Cwd::VERSION
+  * Pod::Usage/$Pod::Usage::VERSION
 
 This program comes with ABSOLUTELY NO WARRANTY. You may redistribute copies of
 clivefeed under the terms of the GNU General Public License as published by the
