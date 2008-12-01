@@ -55,16 +55,16 @@ my $CONFIGDIR   = $ENV{CLIVESCAN_CONFIGDIR}
 my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
 my $PREFSFILE   = File::Spec->catfile($CONFIGDIR, "prefs");
 
-my %opts;       # Holds the options
-my @queue;      # Holds the current URL queue
-my %found_queue;# Holds the results of the scanned video page links
-my $curl;       # Holds the curl handle (reused throught lifespan)
-my $mw;         # Holds the main window handle (GUI)
-my $pwmain;     # Holds the handle to the main paned window
-my $pwtop;      # Holds the handle to the top paned window
-my $pwbottom;   # Holds the handle to the bottom paned window
-my $lbtlink;    # Holds the handle to the listbox tree of found links
-my $lbtqueue;   # Holds the handle to the listbox tree of queued links
+my %opts;       # options
+my @queue;      # current URL queue
+my %found_queue;# results of the scanned video page links
+my $curl;       # curl handle (reused throught lifespan)
+my $mw;         # main window handle (GUI)
+my $pwmain;     # handle to the main paned window
+my $pwtop;      # handle to the top paned window
+my $pwbottom;   # handle to the bottom paned window
+my $lbtlink;    # handle to the listbox tree of found links
+my $lbtqueue;   # handle to the listbox tree of queued links
 
 # Parse config
 my $conf = Config::Tiny->read($CONFIGFILE);
@@ -82,16 +82,7 @@ my $prefs = Config::Tiny->read($PREFSFILE);
     mainfont=> $prefs->{gui}->{mainfont},
 );
 
-# Parse cmdline
-# Define those not read from config, init with defaults
-$opts{quiet}    = 0;
-$opts{paste}    = 0;
-$opts{all}      = 0;
 $opts{strict}   = 1;
-$opts{debug}    = 0;
-$opts{help}     = 0;
-$opts{manual}   = 0;
-$opts{version}  = 0;
 $opts{mainfont} = $opts{mainfont} || "{helvetica} -12 bold";
 
 GetOptions(\%opts,
