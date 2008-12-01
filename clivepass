@@ -240,7 +240,6 @@ Perl: $perl_v ($^O)
 Modules:
   * Crypt::PasswdMD5/$Crypt::PasswdMD5::VERSION\t* Crypt::Twofish2/$Crypt::Twofish2::VERSION
   * Crypt::Salt/$Crypt::Salt::VERSION\t\t* Config::Tiny/$Config::Tiny::VERSION
-
 Core modules:
   * Getopt::Long/$Getopt::Long::VERSION\t\t* Encode/$Encode::VERSION
   * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
