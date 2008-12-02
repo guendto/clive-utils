@@ -91,7 +91,7 @@ GetOptions(\%opts,
     'proxy|y=s',
     # Workaround since '$longopt|shortopt' is a no-no.
     'noproxy|X'  => sub { $opts{proxy} = "" },
-    'nostrict|S' => sub { $opts{strict} = 0 },
+    'nostrict|n' => sub { $opts{strict} = 0 },
 ) or pod2usage(1);
 
 # Since 'version|v' => \&print_version and exit cannot tango with tk
@@ -684,7 +684,7 @@ options.
 
 Grab all videos without prompting the GUI.
 
-=item B<-S --nostrict>
+=item B<-n --nostrict>
 
 This option provides a workaround for some search pattern issues that
 are known to occur. For example:

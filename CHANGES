@@ -2,6 +2,7 @@ Version 2.0.0
 
  User-visible changes:
    - clivescan
+   * Changed --nostrict short option from -S to -n
    * Added support for Lastfm wrapped Youtube links
    * Fixed: GUI is no longer invoked if scan found 0 links
    * Tweaked some messages
