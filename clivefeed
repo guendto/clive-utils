@@ -488,7 +488,7 @@ sub on_prefs_ok {
 }
 
 sub save_prefs {
-    mkpath( [$CONFIGDIR], 1, 0700);
+    mkpath( [$CONFIGDIR], 0, 0700);
 
     my $c = Config::Tiny->new;
     $c->{gui}->{geometry} = $mw->geometry();
