@@ -6,6 +6,9 @@ Version 2.1.0
   * Tweaked --version output
   * Added support for liveleakcom
 
+ Developer-visible changes:
+  * Updated INSTALL
+
 
 Version 2.0.0
 (December 2, 2008)

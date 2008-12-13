@@ -1,25 +1,8 @@
 Prerequisites
 ------------------------------------------------------------------------------
 
-clive >= 2.0beta1 (http://clive.sf.net)
+clive >= 2.0.0 (http://clive.sf.net)
 Perl >= 5.8 (http://perl.org)
-
-The following 3rd party perl modules are required. The versions are
-recommendations. The module lists below are more or less comprehensive.
-The required Perl core modules have not been listed below.
-
-Note that some Unix/Linux distributions may pack some of the Perl core modules
-separately and require them to be installed separately. This means also that
-the actual installation procedure may vary greatly for each distro.
-
-The FreeBSD and Ubuntu details further below are likely to be inaccurate and
-missing some steps. The information was mainly gathered to aid the current
-and future clive package maintainers to get started. Note that the CPAN
-installation steps exist only if the distro does not have the equivalent
-package or a version available. For example, the 3.x of WWW::Curl kept
-refusing to work with the current version of clive.
-
-Note that the Clipboard module is OPTIONAL.
 
 clivefeed
 ---------
@@ -44,12 +27,16 @@ clivepass
 * Crypt::PasswdMD5/1.3        * Crypt::Twofish2/1.01
 * Crypt::Salt/0.01            * Config::Tiny/2.12
 
+Most distros should have the above versions available as packages.
+If not, you can still use CPAN to install the missing modules, e.g.:
+    % cpan install WWW::Curl # as root
+
 
 Installation
 ------------------------------------------------------------------------------
 
 Extract:
-    % tar xvjf clive-utils-$release.tar.bz2 && cd clive-utils-$release
+    % tar xvjf clive-utils-$release.tar.bz2; cd clive-utils-$release
 
 Run:
     # If the path to clive(1) is not specified (e.g. --clive=path), the
@@ -67,6 +54,9 @@ Getting started:
 The manual pages is written in Perl Pod markup language and they are embedded
 in the script files. See "perldoc perlpod" for more info. For example:
     % pod2man clivefeed > clivefeed.1
+
+See also:
+    configs/ subdir for example configuration files
 
 
 Installation: FreeBSD (7.0)
