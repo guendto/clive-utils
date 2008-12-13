@@ -245,6 +245,16 @@ sub scan_page {
         # TODO: add BreakEmbed, e.g.:
         # Page  URL: http://break.com/index/if-all-movies-had-cell-phones.html
         # Embed URL: http://embed.break.com/600081
+        Liveleak => {
+            in_scanurl => qr|\Qliveleak.com\E|i,
+            search_for => qr|\Q/view?i=\E(.*?)["< &]|i,
+            url_prefix => "http://liveleak.com/view?i=",
+        },
+        LiveleakEmbed => {
+            in_scanurl => undef,
+            url_prefix => "http://liveleak.com/view?i=",
+            search_for => qr|\Qliveleak.com/e/\E(.*?)["< &]|i,
+        },
     );
 
     print "scan " unless $opts{quiet};
@@ -270,7 +280,7 @@ sub scan_page {
     my %h = map { $_, 1 } @links; # Weed out duplicates
     @links = keys %h;
 
-    print " found " .scalar @links. " link(s).\n"
+    print " found " .scalar @links. " unique link(s).\n"
         unless $opts{quiet};
 
     my %verified_links;
