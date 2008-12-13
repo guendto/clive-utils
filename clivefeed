@@ -235,12 +235,6 @@ Core modules:
   * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
   * File::Path/$File::Path::VERSION\t\t* Encode/$Encode::VERSION
   * Pod::Usage/$Pod::Usage::VERSION
-
-This program comes with ABSOLUTELY NO WARRANTY. You may redistribute copies of
-clivefeed under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or (at your option)
-any later version. You should have received a copy of the General Public License
-along with this program. If not, see http://www.gnu.org/licenses/.
 ";
 return $s if $noexit;
 print $s; exit;
