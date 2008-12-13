@@ -4,6 +4,7 @@ Version 2.1.0
 
  User-visible changes:
   * Tweaked --version output
+  - clivescan
   * Added support for liveleakcom
 
  Developer-visible changes:
