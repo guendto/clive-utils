@@ -230,17 +230,17 @@ sub lookup_login {
 sub print_version {
     my $perl_v  = sprintf "%vd", $^V;
     print
-"clivepass version $VERSION.  Copyright (C) 2008 Toni Gundogdu.
-
-Perl: $perl_v ($^O)
+"clivepass version $VERSION  [$^O]
+Copyright (c) 2008 Toni Gundogdu.
+ * Perl/$perl_v
 Modules:
-  * Crypt::PasswdMD5/$Crypt::PasswdMD5::VERSION\t* Crypt::Twofish2/$Crypt::Twofish2::VERSION
-  * Crypt::Salt/$Crypt::Salt::VERSION\t\t* Config::Tiny/$Config::Tiny::VERSION
+ * Crypt::PasswdMD5/$Crypt::PasswdMD5::VERSION\t\t* Crypt::Twofish2/$Crypt::Twofish2::VERSION
+ * Crypt::Salt/$Crypt::Salt::VERSION\t\t* Config::Tiny/$Config::Tiny::VERSION
 Core modules:
-  * Getopt::Long/$Getopt::Long::VERSION\t\t* Encode/$Encode::VERSION
-  * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
-  * Pod::Usage/$Pod::Usage::VERSION\t\t* Digest::MD5/$Digest::MD5::VERSION
-  * MIME::Base64/$MIME::Base64::VERSION
+ * Getopt::Long/$Getopt::Long::VERSION\t\t* Encode/$Encode::VERSION
+ * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
+ * Pod::Usage/$Pod::Usage::VERSION\t\t* Digest::MD5/$Digest::MD5::VERSION
+ * MIME::Base64/$MIME::Base64::VERSION
 "; exit;
 }
 

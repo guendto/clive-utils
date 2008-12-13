@@ -221,20 +221,20 @@ sub print_version {
     my $perl_v  = sprintf "%vd", $^V;
     my $clipb_v = $opted_mods{Clipboard} ? $Clipboard::VERSION : "-";
     my $s       = sprintf
-"clivefeed version $VERSION.  Copyright (C) 2008 Toni Gundogdu.
-
-Perl: $perl_v ($^O)
+"clivefeed version $VERSION  [$^O]
+Copyright (c) 2008 Toni Gundogdu.
+ * Perl/$perl_v
 Modules:
-  * Config::Tiny/$Config::Tiny::VERSION\t\t* WWW::Curl/$WWW::Curl::VERSION
-  * XML::RSS::LibXML/$XML::RSS::LibXML::VERSION\t* Clipboard/$clipb_v
-  * Tk/$Tk::VERSION\t\t\t* URI::Escape/$URI::Escape::VERSION
-  * Tk::DialogBox/$Tk::DialogBox::VERSION\t\t* HTML::Strip/$HTML::Strip::VERSION
-  * Tk::FontDialog/$Tk::FontDialog::VERSION\t\t* Tk::Tree/$Tk::Tree::VERSION
+ * Config::Tiny/$Config::Tiny::VERSION\t\t* WWW::Curl/$WWW::Curl::VERSION
+ * XML::RSS::LibXML/$XML::RSS::LibXML::VERSION\t* Clipboard/$clipb_v
+ * Tk/$Tk::VERSION\t\t\t* URI::Escape/$URI::Escape::VERSION
+ * Tk::DialogBox/$Tk::DialogBox::VERSION\t\t* HTML::Strip/$HTML::Strip::VERSION
+ * Tk::FontDialog/$Tk::FontDialog::VERSION\t\t* Tk::Tree/$Tk::Tree::VERSION
 Core modules:
-  * Getopt::Long/$Getopt::Long::VERSION\t\t* Cwd/$Cwd::VERSION
-  * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
-  * File::Path/$File::Path::VERSION\t\t* Encode/$Encode::VERSION
-  * Pod::Usage/$Pod::Usage::VERSION
+ * Getopt::Long/$Getopt::Long::VERSION\t\t* Cwd/$Cwd::VERSION
+ * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
+ * File::Path/$File::Path::VERSION\t\t* Encode/$Encode::VERSION
+ * Pod::Usage/$Pod::Usage::VERSION
 ";
 return $s if $noexit;
 print $s; exit;

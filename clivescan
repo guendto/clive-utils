@@ -366,19 +366,19 @@ sub print_version {
     my $perl_v  = sprintf "%vd", $^V;
     my $clipb_v = $opted_mods{Clipboard} ? $Clipboard::VERSION : "-";
     my $s       = sprintf
-"clivescan version $VERSION.  Copyright (C) 2008 Toni Gundogdu.
-
-Perl: $perl_v ($^O)
+"clivescan version $VERSION  [$^O]
+Copyright (c) 2008 Toni Gundogdu.
+ * Perl/$perl_v
 Modules:
-  * Config::Tiny/$Config::Tiny::VERSION\t\t* WWW::Curl/$WWW::Curl::VERSION
-  * Tk/$Tk::VERSION\t\t\t* Tk::Tree/$Tk::Tree::VERSION
-  * Tk::DialogBox/$Tk::DialogBox::VERSION\t\t* Clipboard/$clipb_v
-  * Tk::FontDialog/$Tk::FontDialog::VERSION\t\t* HTML::TokeParser/$HTML::TokeParser::VERSION
+ * Config::Tiny/$Config::Tiny::VERSION\t\t* WWW::Curl/$WWW::Curl::VERSION
+ * Tk/$Tk::VERSION\t\t\t* Tk::Tree/$Tk::Tree::VERSION
+ * Tk::DialogBox/$Tk::DialogBox::VERSION\t\t* Clipboard/$clipb_v
+ * Tk::FontDialog/$Tk::FontDialog::VERSION\t\t* HTML::TokeParser/$HTML::TokeParser::VERSION
 Core modules:
-  * Getopt::Long/$Getopt::Long::VERSION\t\t* Digest::SHA/$Digest::SHA::VERSION
-  * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
-  * File::Path/$File::Path::VERSION\t\t* Encode/$Encode::VERSION
-  * Pod::Usage/$Pod::Usage::VERSION\t\t* Cwd/$Cwd::VERSION
+ * Getopt::Long/$Getopt::Long::VERSION\t\t* Digest::SHA/$Digest::SHA::VERSION
+ * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
+ * File::Path/$File::Path::VERSION\t\t* Encode/$Encode::VERSION
+ * Pod::Usage/$Pod::Usage::VERSION\t\t* Cwd/$Cwd::VERSION
 ";
 return $s if $noexit;
 print $s; exit;

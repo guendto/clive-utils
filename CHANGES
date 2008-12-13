@@ -3,6 +3,7 @@ Version 2.1.0
  NOTE: Changed license GPL3 => ISC/OpenBSD.
 
  User-visible changes:
+  * Tweaked --version output
   * Added support for liveleakcom
 
 
