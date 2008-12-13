@@ -277,6 +277,8 @@ sub scan_page {
             while ( $$pageref =~ /$re{$host}{search_for}/g );
     }
 
+    print "\nremove duplicates ..." unless $opts{quiet};
+
     my %h = map { $_, 1 } @links; # Weed out duplicates
     @links = keys %h;
 
