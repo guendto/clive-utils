@@ -8,10 +8,10 @@ clivefeed
 ---------
 
 * Config::Tiny/2.12           * WWW::Curl/4.05
-* XML::RSS::LibXML/0.3002     * Clipboard/0.09
+* XML::RSS::LibXML/0.3002     * Clipboard/0.09 (optional)
 * Tk/804.027                  * URI::Escape/3.29
 * Tk::DialogBox/4.013         * HTML::Strip/1.06
-* Tk::FontDialog/0.15         * Tk::Tree/4.005
+* Tk::FontDialog/0.15 (opt.)  * Tk::Tree/4.005
 
 clivescan
 ---------
@@ -19,7 +19,7 @@ clivescan
 * Config::Tiny/2.12           * WWW::Curl/4.05
 * Tk/804.027                  * Tk::Tree/4.005
 * Tk::DialogBox/4.013         * Clipboard/0.09
-* Tk::FontDialog/0.15         * HTML::TokeParser/2.37
+* Tk::FontDialog/0.15 (opt.)  * HTML::TokeParser/2.37
 
 clivepass
 ---------

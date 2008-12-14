@@ -8,6 +8,9 @@ Version 2.1.0
   * Added support for liveleakcom
 
  Developer-visible changes:
+  * Made Tk::FontDialog module optional
+  * Tweaked module imports (e.g. "use Cwd" => "use Cwd qw(getcwd)")
+  * Changed to require WWW::Curl 4.05+
   * Updated INSTALL
 
 

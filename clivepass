@@ -23,18 +23,19 @@ use strict;
 
 binmode(STDOUT, ":utf8");
 
-use Crypt::PasswdMD5;
+use Crypt::PasswdMD5 qw(unix_md5_crypt);
+use Crypt::Salt qw(salt);
 use Crypt::Twofish2;
 use Config::Tiny;
-use Crypt::Salt;
+
 # Core modules:
-use Digest::MD5 qw(md5_hex);
-use MIME::Base64;
+use MIME::Base64 qw(encode_base64 decode_base64);
 use Getopt::Long qw(:config bundling);
+use Pod::Usage qw(pod2usage);
+use Digest::MD5 qw(md5_hex);
+use File::Path qw(mkpath);
+use File::Find qw(find);
 use File::Spec;
-use File::Find;
-use File::Path;
-use Pod::Usage;
 use Encode;
 
 my $VERSION     = "2.1.0-dev";
@@ -63,7 +64,7 @@ sub main {
     elsif ( $opts{get} )    { get_login(); }
     elsif ( $opts{show} )   { show_logins(); }
     else {
-        pod2usage(-exitstatus => 0, -verbose => 1);
+        print STDERR "Try --help for more info.\n";
     }
 }
 

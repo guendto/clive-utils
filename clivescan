@@ -23,9 +23,8 @@ use strict;
 
 binmode(STDOUT, ":utf8");
 
+use WWW::Curl::Easy 4.05;
 use HTML::TokeParser;
-use WWW::Curl::Easy;
-use Tk::FontDialog;
 use Tk::DialogBox;
 use Config::Tiny;
 use Tk::Tree;
@@ -34,16 +33,17 @@ use Tk;
 # Core modules:
 use Getopt::Long qw(:config bundling);
 use Digest::SHA qw(sha1_hex);
+use Pod::Usage qw(pod2usage);
+use File::Path qw(mkpath);
+use File::Find qw(find);
+use Cwd qw(getcwd);
 use File::Spec;
-use File::Find;
-use File::Path;
-use Pod::Usage;
 use Encode;
-use Cwd;
 
 # Non-essentials
 my %opted_mods = (Clipboard => 1);
-eval "use Clipboard"; $opted_mods{Clipboard}=0 if $@;
+eval "use Clipboard";      $opted_mods{Clipboard}  = 0 if $@;
+eval "use Tk::FontDialog"; $opted_mods{FontDialog} = 0 if $@;
 
 my $VERSION     = "2.1.0-dev";
 my $CONFIGDIR   = $ENV{CLIVESCAN_CONFIGDIR}
@@ -365,6 +365,7 @@ sub print_version {
     my $noexit  = shift;
     my $perl_v  = sprintf "%vd", $^V;
     my $clipb_v = $opted_mods{Clipboard} ? $Clipboard::VERSION : "-";
+    my $fntdlg_v= $opted_mods{FontDialog} ? $Tk::FontDialog::VERSION : "-";
     my $s       = sprintf
 "clivescan version $VERSION  [$^O]
 Copyright (c) 2008 Toni Gundogdu.
@@ -373,7 +374,7 @@ Modules:
  * Config::Tiny/$Config::Tiny::VERSION\t\t* WWW::Curl/$WWW::Curl::VERSION
  * Tk/$Tk::VERSION\t\t\t* Tk::Tree/$Tk::Tree::VERSION
  * Tk::DialogBox/$Tk::DialogBox::VERSION\t\t* Clipboard/$clipb_v
- * Tk::FontDialog/$Tk::FontDialog::VERSION\t\t* HTML::TokeParser/$HTML::TokeParser::VERSION
+ * Tk::FontDialog/$fntdlg_v\t\t* HTML::TokeParser/$HTML::TokeParser::VERSION
 Core modules:
  * Getopt::Long/$Getopt::Long::VERSION\t\t* Digest::SHA/$Digest::SHA::VERSION
  * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
@@ -408,9 +409,12 @@ sub init_gui {
         -command => sub { save_prefs(); exit; } );
 
     # Menu: Edit
-    my $edit = $mb->cascade(-label => 'Edit', -underline => 0, -tearoff => 0);
-    $edit->command(-label => 'Preferences...',
-        -underline => 0, -command => \&on_prefs);
+    if ( $opted_mods{FontDialog} ) {
+        my $edit =
+            $mb->cascade(-label => 'Edit', -underline => 0, -tearoff => 0);
+        $edit->command(-label => 'Preferences...',
+            -underline => 0, -command => \&on_prefs);
+    }
 
     # Menu: Help
     my $help = $mb->cascade(-label => 'Help', -underline => 0, -tearoff => 0);
@@ -497,7 +501,9 @@ sub init_gui {
     # Add upper and lower parts to main paned window
     $pwmain->add($pwtop, $pwbottom, -height => $opts{pwmain} || 200);
 
-    $mw->RefontTree(-font => $opts{mainfont});
+    $mw->RefontTree(-font => $opts{mainfont})
+        if $opted_mods{FontDialog};
+
     $pwmain->pack(-expand => 1, -fill => 'both');
 
     MainLoop;
