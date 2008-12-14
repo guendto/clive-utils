@@ -260,8 +260,6 @@ sub init_gui {
     my $file = $mb->cascade(-label => '~File', -tearoff => 0);
     $file->command(-label => '~Extract videos in queue...',
          -command =>  \&on_extract);
-    $file->command(-label => '~Save selected links...',
-        -command => \&on_save );
     $file->separator;
     $file->command(-label => '~Quit',
         -command => sub { save_prefs(); exit; } );
