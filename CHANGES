@@ -3,6 +3,7 @@ Version 2.1.0
  NOTE: Changed license GPL3 => ISC/OpenBSD.
 
  User-visible changes:
+  * Added partial mnemonics (menus)
   * Tweaked --version output
   - clivescan
   * Added support for liveleakcom

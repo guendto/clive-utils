@@ -257,25 +257,27 @@ sub init_gui {
     $mw->configure(-menu => $mb);
 
     # Menu: File
-    my $file = $mb->cascade(-label => 'File', -underline => 0, -tearoff => 0);
-    $file->command(-label => 'Extract videos in queue...',
-        -underline => 0, -command =>  \&on_extract);
+    my $file = $mb->cascade(-label => '~File', -tearoff => 0);
+    $file->command(-label => '~Extract videos in queue...',
+         -command =>  \&on_extract);
+    $file->command(-label => '~Save selected links...',
+        -command => \&on_save );
     $file->separator;
-    $file->command(-label => 'Quit', -underline => 0,
+    $file->command(-label => '~Quit',
         -command => sub { save_prefs(); exit; } );
 
     # Menu: Edit
     if ( $opted_mods{FontDialog} ) {
         my $edit =
-            $mb->cascade(-label => 'Edit', -underline => 0, -tearoff => 0);
-        $edit->command(-label => 'Preferences...',
-            -underline => 0, -command => \&on_prefs);
+            $mb->cascade(-label => '~Edit', -tearoff => 0);
+        $edit->command(-label => 'Prefere~nces...',
+             -command => \&on_prefs);
     }
 
     # Menu: Help
-    my $help = $mb->cascade(-label => 'Help', -underline => 0, -tearoff => 0);
-    $help->command(-label => 'About...',
-        -underline => 0, -command => \&on_about);
+    my $help = $mb->cascade(-label => '~Help', -tearoff => 0);
+    $help->command(-label => '~About...',
+         -command => \&on_about);
 
     # The GUI has an upper and a lower part
     $pwmain = $mw->Panedwindow(-orient => 'v', -opaqueresize => 0);
