@@ -194,22 +194,22 @@ sub scan_page {
         # paths, e.g. <a href="/watch?v=...">.
         Youtube => {
             in_scanurl => qr|\Qyoutube.com\E|i,
-            search_for => qr|\Q/watch?v=\E(.*?)["< &]|i,
+            search_for => qr|\Q/watch?v=\E(.*?)["< &#%]|i,
             url_prefix => "http://youtube.com/watch?v=",
         },
         YoutubeEmbed => {
             in_scanurl => undef,
-            search_for => qr|\Qyoutube.com/v/\E(.*?)["< &]|i,
+            search_for => qr|\Qyoutube.com/v/\E(.*?)["< &#%]|i,
             url_prefix => "http://youtube.com/watch?v=",
         },
         GVideo => { # NOTE: Ignores original TLD, uses .com for extraction
             in_scanurl => qr|\Qvideo.google.\E|i,
-            search_for => qr|\Q/videoplay?docid=\E(.*?)["< &]|i,
+            search_for => qr|\Q/videoplay?docid=\E(.*?)["< &#%]|i,
             url_prefix => "http://video.google.com/videoplay?docid=",
         },
         GVideoEmbed => { # NOTE: Ditto.
             in_scanurl => undef,
-            search_for => qr|\Q/googleplayer.swf?docid=\E(.*?)["< &]|i,
+            search_for => qr|\Q/googleplayer.swf?docid=\E(.*?)["< &#%]|i,
             url_prefix => "http://video.google.com/videoplay?docid=",
         },
 #        Metacafe => { # NOTE: metacafe.com/watch/$id is enough for redirect
@@ -234,12 +234,12 @@ sub scan_page {
         },
         LastfmYoutube => { # Lastfm wraps some of the Youtube videos
             in_scanurl => qr|\Qlast.fm\E|i,
-            search_for => qr|\Q/+videos/\E\Q+1-\E(.*?)["< &#]|i,
+            search_for => qr|\Q/+videos/\E\Q+1-\E(.*?)["< &#%]|i,
             url_prefix => "http://youtube.com/watch?v=",
         },
         Break => {
             in_scanurl => qr|\Qbreak.com\E|i,
-            search_for => qr|\Q/index/\E(.*?)["< &]|i,
+            search_for => qr|\Q/index/\E(.*?)["< &#%]|i,
             url_prefix => "http://break.com/index/",
         },
         # TODO: add BreakEmbed, e.g.:
@@ -247,13 +247,13 @@ sub scan_page {
         # Embed URL: http://embed.break.com/600081
         Liveleak => {
             in_scanurl => qr|\Qliveleak.com\E|i,
-            search_for => qr|\Q/view?i=\E(.*?)["< &]|i,
+            search_for => qr|\Q/view?i=\E(.*?)["< &#%]|i,
             url_prefix => "http://liveleak.com/view?i=",
         },
         LiveleakEmbed => {
             in_scanurl => undef,
             url_prefix => "http://liveleak.com/view?i=",
-            search_for => qr|\Qliveleak.com/e/\E(.*?)["< &]|i,
+            search_for => qr|\Qliveleak.com/e/\E(.*?)["< &#%]|i,
         },
     );
 

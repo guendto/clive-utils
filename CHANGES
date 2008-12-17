@@ -6,6 +6,7 @@ Version 2.1.0
   * Added partial mnemonics (menus)
   * Tweaked --version output
   - clivescan
+  * Fixed scanning: invalid links with garbage chars (e.g. youtube playlists)
   * Added support for liveleakcom
 
  Developer-visible changes:
