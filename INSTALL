@@ -64,7 +64,7 @@ See also:
 Installation: FreeBSD (7.0)
 ------------------------------------------------------------------------------
 
-TODO: Needs more throughral details.
+TODO: Needs more extensive details.
 
 From the ports:
   * x11-toolkits/p5-Tk-FontDialog
@@ -92,7 +92,7 @@ From CPAN:
 Installation: Ubuntu (Hardy)
 ------------------------------------------------------------------------------
 
-TODO: Needs more throughral details.
+TODO: Needs more extensive details.
 
 From apt: # Typically: "sudo apt-get install $module"
   * libcurl4-openssl-dev
