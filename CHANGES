@@ -9,6 +9,8 @@ Version 2.1.0
   * Added support for liveleakcom
 
  Developer-visible changes:
+  * Started to bundle the src tarball with manual pages generated using genman
+  * Added genman script for wrapping pod2man
   * Made Tk::FontDialog module optional
   * Tweaked module imports (e.g. "use Cwd" => "use Cwd qw(getcwd)")
   * Changed to require WWW::Curl 4.05+

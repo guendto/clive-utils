@@ -54,6 +54,8 @@ Getting started:
 The manual pages is written in Perl Pod markup language and they are embedded
 in the script files. See "perldoc perlpod" for more info. For example:
     % pod2man clivefeed > clivefeed.1
+    Or:
+    % ./genman # wraps the above for all scripts with the most common options
 
 See also:
     configs/ subdir for example configuration files
@@ -61,6 +63,8 @@ See also:
 
 Installation: FreeBSD (7.0)
 ------------------------------------------------------------------------------
+
+TODO: Needs more throughral details.
 
 From the ports:
   * x11-toolkits/p5-Tk-FontDialog
@@ -87,6 +91,8 @@ From CPAN:
 
 Installation: Ubuntu (Hardy)
 ------------------------------------------------------------------------------
+
+TODO: Needs more throughral details.
 
 From apt: # Typically: "sudo apt-get install $module"
   * libcurl4-openssl-dev
