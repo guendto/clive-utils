@@ -32,5 +32,5 @@ sub generate {
     system(qq/pod2man -c "$script Manual" -n $script /
          . qq/-s 1 -r $release $script > $script.1/);
 
-    system("gzip $script.1");
+    #system("gzip $script.1");
 }
