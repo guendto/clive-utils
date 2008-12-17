@@ -1,0 +1,36 @@
+#!/usr/bin/env perl
+
+use warnings;
+use strict;
+
+my @scripts = qw(clivefeed clivescan clivepass);
+
+generate($_) foreach @scripts;
+
+
+sub generate {
+    my ($script) = @_;
+
+    print "processing $script...\n";
+    open(my $fh, "<", $script) or die "error: $script: $!";
+
+    my $re = qr|VERSION = "(.*?)"|;
+    my $release;
+
+    while ( <$fh> ) {
+        if ( $_ =~ /$re/ ) {
+            $release = $1;
+            last;
+        }
+    }
+
+    close($fh);
+
+    print STDERR "error: release string not found\n" and return
+        unless $release;
+
+    system(qq/pod2man -c "$script Manual" -n $script /
+         . qq/-s 1 -r $release $script > $script.1/);
+
+    system("gzip $script.1");
+}
