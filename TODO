@@ -1,6 +1,6 @@
-2.1.0
------
-
 Probably someday
 ----------------
+ * Accurate and detailed installation steps
+   - FreeBSD
+   - Ubuntu
  * clivescan: Add support for Break.com embedded URLs (see src for notes)
