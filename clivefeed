@@ -46,7 +46,7 @@ my %opted_mods = (Clipboard => 1, FontDialog => 1);
 eval "use Clipboard"; $opted_mods{Clipboard}      = 0 if $@;
 eval "use Tk::FontDialog"; $opted_mods{FontDialog} = 0 if $@;
 
-my $VERSION = "2.1.0-dev";
+my $VERSION = "2.1.0";
 my $CONFIGDIR   = $ENV{CLIVEFEED_CONFIGDIR}
     || File::Spec->catfile($ENV{HOME}, ".config/clivefeed"); 
 my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
