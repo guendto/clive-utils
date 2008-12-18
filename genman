@@ -3,13 +3,18 @@
 use warnings;
 use strict;
 
+use File::Path qw(mkpath);
+
 my @scripts = qw(clivefeed clivescan clivepass);
 
-generate($_) foreach @scripts;
+generate($_)
+    foreach @scripts;
 
 
 sub generate {
     my ($script) = @_;
+
+    mkpath("man/", 0, 0700);
 
     print "processing $script...\n";
     open(my $fh, "<", $script) or die "error: $script: $!";
@@ -30,7 +35,7 @@ sub generate {
         unless $release;
 
     system(qq/pod2man -c "$script Manual" -n $script /
-         . qq/-s 1 -r $release $script > $script.1/);
-
-    #system("gzip $script.1");
+         . qq{-s 1 -r $release $script > man/$script.1});
 }
+
+
