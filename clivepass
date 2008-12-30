@@ -38,7 +38,7 @@ use File::Find qw(find);
 use File::Spec;
 use Encode;
 
-my $VERSION = "2.1.0";
+my $VERSION = "2.1.1-dev";
 my $CONFIGDIR   = $ENV{CLIVEPASS_HOME}
     || File::Spec->catfile($ENV{HOME}, ".config/clivepass");
 my $PASSWDFILE  = File::Spec->catfile($CONFIGDIR, "passwd");
