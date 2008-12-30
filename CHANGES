@@ -1,3 +1,13 @@
+Version 2.1.1-dev
+
+ User-visible changes:
+  - clivefeed
+  * Renamed CLIVEFEED_CONFIGDIR environment variable to CLIVEFEED_HOME
+  - clivescan
+  * Renamed CLIVESCAN_CONFIGDIR environment variable to CLIVESCAN_HOME
+  - clivepass
+  * Renamed CLIVEPASS_CONFIGDIR environment variable to CLIVEPASS_HOME
+
 Version 2.1.0
 (December 18, 2008)
 

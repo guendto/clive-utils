@@ -39,7 +39,7 @@ use File::Spec;
 use Encode;
 
 my $VERSION = "2.1.0";
-my $CONFIGDIR   = $ENV{CLIVEPASS_CONFIGDIR}
+my $CONFIGDIR   = $ENV{CLIVEPASS_HOME}
     || File::Spec->catfile($ENV{HOME}, ".config/clivepass");
 my $PASSWDFILE  = File::Spec->catfile($CONFIGDIR, "passwd");
 
@@ -318,9 +318,8 @@ Delete the login with the I<username>.
 
 =head1 FILES
 
-By default, clivepass searches the ~/.config/clivepass directory for the
-password file. The B<CLIVEPASS_CONFIGDIR> environment variable can be used
-to override this behaviour.
+clivepass searches the ~/.config/clivepass directory for the config file.
+You can override this by setting the B<CLIVEPASS_HOME> environment variable.
 
 =over 4
 

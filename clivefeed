@@ -47,7 +47,7 @@ eval "use Clipboard"; $opted_mods{Clipboard}      = 0 if $@;
 eval "use Tk::FontDialog"; $opted_mods{FontDialog} = 0 if $@;
 
 my $VERSION = "2.1.0";
-my $CONFIGDIR   = $ENV{CLIVEFEED_CONFIGDIR}
+my $CONFIGDIR   = $ENV{CLIVEFEED_HOME}
     || File::Spec->catfile($ENV{HOME}, ".config/clivefeed"); 
 my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
 my $PREFSFILE   = File::Spec->catfile($CONFIGDIR, "prefs");
@@ -646,9 +646,8 @@ Grabs all found videos without prompting.
 
 =head1 FILES
 
-By default, clivefeed searches the ~/.config/clivefeed directory for the
-config file. The B<CLIVEFEED_CONFIGDIR> environment variable can be used
-to override this behaviour.
+clivefeed searches the ~/.config/clivefeed directory for the config file.
+You can override this by setting the B<CLIVEFEED_HOME> environment variable.
 
 =over 4
 

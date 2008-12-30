@@ -46,7 +46,7 @@ eval "use Clipboard";      $opted_mods{Clipboard}  = 0 if $@;
 eval "use Tk::FontDialog"; $opted_mods{FontDialog} = 0 if $@;
 
 my $VERSION = "2.1.0";
-my $CONFIGDIR   = $ENV{CLIVESCAN_CONFIGDIR}
+my $CONFIGDIR   = $ENV{CLIVESCAN_HOME}
     || File::Spec->catfile($ENV{HOME}, ".config/clivescan");
 my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
 my $PREFSFILE   = File::Spec->catfile($CONFIGDIR, "prefs");
@@ -757,9 +757,8 @@ Grabs all found videos from the Youtube front page.
 
 =head1 FILES
 
-By default, clivescan searches the ~/.config/clivescan directory for the
-config file. The B<CLIVESCAN_CONFIGDIR> environment variable can be used
-to override this behaviour.
+clivescan searches the ~/.config/clivescan directory for the config file.
+You can override this by setting the B<CLIVESCAN_HOME> environment variable.
 
 =over 4
 
