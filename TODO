@@ -7,3 +7,4 @@ Probably someday
    - FreeBSD
    - Ubuntu
  * clivescan: Add support for Break.com embedded URLs (see src for notes)
+ * clivescan: Add evisor.tv support
