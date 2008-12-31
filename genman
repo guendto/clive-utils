@@ -5,16 +5,21 @@ use strict;
 
 use File::Path qw(mkpath);
 
-my @scripts = qw(clivefeed clivescan clivepass);
+main();
 
-generate($_)
-    foreach @scripts;
 
+sub main {
+    print "creating man/ subdir for generated man files...\n";
+    mkpath("man/", 0, 0700);
+
+    my @scripts = qw(clivefeed clivescan clivepass);
+
+    generate($_)
+        foreach @scripts;
+}
 
 sub generate {
     my ($script) = @_;
-
-    mkpath("man/", 0, 0700);
 
     print "processing $script...\n";
     open(my $fh, "<", $script) or die "error: $script: $!";

@@ -10,6 +10,12 @@ Version 2.1.1-dev
   - clivepass
   * Renamed CLIVEPASS_CONFIGDIR environment variable to CLIVEPASS_HOME
 
+ Developer-visible changes:
+  * Tweaked genman script
+    - Be more verbose
+    - Cleaned up code
+
+
 Version 2.1.0
 (December 18, 2008)
 
