@@ -47,9 +47,9 @@ eval "use Tk::FontDialog"; $opted_mods{FontDialog} = 0 if $@;
 
 my $VERSION = "2.1.1-dev";
 my $CONFIGDIR   = $ENV{CLIVESCAN_HOME}
-    || File::Spec->catfile($ENV{HOME}, ".config/clivescan");
+    || File::Spec->catfile($ENV{HOME}, ".config/clive-utils");
 my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
-my $PREFSFILE   = File::Spec->catfile($CONFIGDIR, "prefs");
+my $PREFSFILE   = File::Spec->catfile($CONFIGDIR, "scan.prefs");
 
 my %opts;       # options
 my @queue;      # current URL queue
@@ -757,16 +757,16 @@ Grabs all found videos from the Youtube front page.
 
 =head1 FILES
 
-clivescan searches the ~/.config/clivescan directory for the config file.
+clivescan searches the ~/.config/clive-utils directory for the config file.
 You can override this by setting the B<CLIVESCAN_HOME> environment variable.
 
 =over 4
 
-=item ~/.config/clivescan/config
+=item ~/.config/clive-utils/config
 
 Configuration file.
 
-=item ~/.config/clivescan/prefs
+=item ~/.config/clive-utils/scan.prefs
 
 GUI preferences (e.g. fonts, window position, sash coords, ...).
 

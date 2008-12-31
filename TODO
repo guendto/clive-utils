@@ -1,9 +1,5 @@
 2.1.1
 
- * Change all utilities to use ~/.config/clive-utils
-   - ~/.config/clive-utils/feed.prefs
-   - ~/.config/clive-utils/scan.prefs
- * Update manual pages FILES sections
 
 Probably someday
 ----------------

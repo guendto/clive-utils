@@ -40,7 +40,7 @@ use Encode;
 
 my $VERSION = "2.1.1-dev";
 my $CONFIGDIR   = $ENV{CLIVEPASS_HOME}
-    || File::Spec->catfile($ENV{HOME}, ".config/clivepass");
+    || File::Spec->catfile($ENV{HOME}, ".config/clive-utils");
 my $PASSWDFILE  = File::Spec->catfile($CONFIGDIR, "passwd");
 
 my %opts;
@@ -318,12 +318,12 @@ Delete the login with the I<username>.
 
 =head1 FILES
 
-clivepass searches the ~/.config/clivepass directory for the config file.
+clivepass searches the ~/.config/clive-utils directory for the config file.
 You can override this by setting the B<CLIVEPASS_HOME> environment variable.
 
 =over 4
 
-=item ~/.config/clivepass/passwd
+=item ~/.config/clive-utils/passwd
 
 Password file. Contains the salted passphrase hash and login usernames and
 encrypted passwords.

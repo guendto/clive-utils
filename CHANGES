@@ -1,6 +1,8 @@
 Version 2.1.1-dev
 
  User-visible changes:
+  - all
+  * Changed to use ~/.config/clive-utils instead of ~/.config/clive$util$
   - clivefeed
   * Renamed CLIVEFEED_CONFIGDIR environment variable to CLIVEFEED_HOME
   - clivescan

@@ -48,9 +48,9 @@ eval "use Tk::FontDialog"; $opted_mods{FontDialog} = 0 if $@;
 
 my $VERSION = "2.1.1-dev";
 my $CONFIGDIR   = $ENV{CLIVEFEED_HOME}
-    || File::Spec->catfile($ENV{HOME}, ".config/clivefeed"); 
+    || File::Spec->catfile($ENV{HOME}, ".config/clive-utils"); 
 my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
-my $PREFSFILE   = File::Spec->catfile($CONFIGDIR, "prefs");
+my $PREFSFILE   = File::Spec->catfile($CONFIGDIR, "feed.prefs");
 
 my %opts;       # options
 my @queue;      # current URL queue
@@ -646,16 +646,16 @@ Grabs all found videos without prompting.
 
 =head1 FILES
 
-clivefeed searches the ~/.config/clivefeed directory for the config file.
+clivefeed searches the ~/.config/clive-utils directory for the config file.
 You can override this by setting the B<CLIVEFEED_HOME> environment variable.
 
 =over 4
 
-=item ~/.config/clivefeed/config
+=item ~/.config/clive-utils/config
 
 Configuration file.
 
-=item ~/.config/clivefeed/prefs
+=item ~/.config/clive-utils/feed.prefs
 
 GUI preferences (e.g. fonts, window position, sash coords, ...).
 
