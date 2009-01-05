@@ -56,9 +56,6 @@ Run:
         % clivescan [option]... [URL]...
         % clivepass [option]...
 
-    See also the configs/ for example configuration files. To minimize the
-    overhead, it's a good idea to save the path to a configuration file.
-
 Getting started:
     The manual pages are written in Perl Pod markup language and they are
     embedded in the script files. See "perldoc perlpod" for more info.
@@ -72,8 +69,3 @@ Getting started:
     There is also the "genman" script which wraps the pod2man and produces
     the manual pages with the most common options. This script is used to
     generate the manual pages bundled with the source code.
-
-See also:
-    configs/ subdir for example configuration files
-
-

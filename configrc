@@ -1,5 +1,5 @@
-## An example config file for clivefeed.
-## Default location: ~/.config/clivefeed/config
+## An example config file for clive-utils.
+## Default location: ~/.config/clive-utils/config
 
 [clive]
     #path = /path/to/clive
