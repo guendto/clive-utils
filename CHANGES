@@ -18,6 +18,7 @@ Version 2.1.1-dev
     - Be more verbose
     - Cleaned up code
   - clivepass
+  * Removed Crypt::Salt module prereq.
   * Replaced prereq. module Crypt::Twofish2 with Crypt::Twofish
 
 

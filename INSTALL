@@ -39,7 +39,7 @@ clivepass
 ---------
 
 * Crypt::PasswdMD5/1.3        * Crypt::Twofish/2.12
-* Crypt::Salt/0.01            * Config::Tiny/2.12
+* Config::Tiny/2.12
 
 
 Installation
