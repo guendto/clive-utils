@@ -38,7 +38,7 @@ clivescan
 clivepass
 ---------
 
-* Crypt::PasswdMD5/1.3        * Crypt::Twofish2/1.01
+* Crypt::PasswdMD5/1.3        * Crypt::Twofish/2.12
 * Crypt::Salt/0.01            * Config::Tiny/2.12
 
 

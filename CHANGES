@@ -17,6 +17,8 @@ Version 2.1.1-dev
   * Tweaked genman script
     - Be more verbose
     - Cleaned up code
+  - clivepass
+  * Replaced prereq. module Crypt::Twofish2 with Crypt::Twofish
 
 
 Version 2.1.0

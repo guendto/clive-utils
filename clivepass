@@ -25,7 +25,7 @@ binmode(STDOUT, ":utf8");
 
 use Crypt::PasswdMD5 qw(unix_md5_crypt);
 use Crypt::Salt qw(salt);
-use Crypt::Twofish2;
+use Crypt::Twofish;
 use Config::Tiny;
 
 # Core modules:
@@ -153,7 +153,7 @@ sub new_login {
     print STDERR "error: passwords did not match\n" and exit
         unless $pwd eq $again;
 
-    my $c = Crypt::Twofish2->new($key, Crypt::Twofish2::MODE_CBC);
+    my $c = Crypt::Twofish->new($key);
 
     $passwd->{login}->{$user} =
         encode_base64( $c->encrypt( pack('a16',$pwd) ) );
@@ -186,7 +186,7 @@ sub get_login {
     print STDERR qq/error: no such login with the "$opts{get}" /
         . "username exists\n" and exit unless $pwd;
 
-    my $c = Crypt::Twofish2->new($key, Crypt::Twofish2::MODE_CBC);
+    my $c = Crypt::Twofish->new($key);
     print "login: " .$opts{get}."=". $c->decrypt(decode_base64($pwd)) ."\n";
 }
 
@@ -235,7 +235,7 @@ sub print_version {
 Copyright (c) 2008,2009 Toni Gundogdu.
  * Perl/$perl_v
 Modules:
- * Crypt::PasswdMD5/$Crypt::PasswdMD5::VERSION\t\t* Crypt::Twofish2/$Crypt::Twofish2::VERSION
+ * Crypt::PasswdMD5/$Crypt::PasswdMD5::VERSION\t\t* Crypt::Twofish/$Crypt::Twofish::VERSION
  * Crypt::Salt/$Crypt::Salt::VERSION\t\t* Config::Tiny/$Config::Tiny::VERSION
 Core modules:
  * Getopt::Long/$Getopt::Long::VERSION\t\t* Encode/$Encode::VERSION
