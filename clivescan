@@ -358,7 +358,15 @@ sub find_clive {
 
 sub run_clive {
     my (@q) = @_;
-    system "$opts{clive} $opts{opts} " . join(' ', @q);
+
+    my $pid = fork;
+    if ($pid < 0) {
+        print STDERR "error: fork failed: $!\n";
+        exit 1;
+    } elsif ($pid != 0) {
+        exec "$opts{clive} $opts{opts} " . join(' ',@q)
+            or print STDERR "error: exec failed: $!\n" and exit;
+    }
 }
 
 sub print_version {
