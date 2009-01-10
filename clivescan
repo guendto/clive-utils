@@ -45,7 +45,7 @@ my %opted_mods = (Clipboard => 1);
 eval "use Clipboard";      $opted_mods{Clipboard}  = 0 if $@;
 eval "use Tk::FontDialog"; $opted_mods{FontDialog} = 0 if $@;
 
-my $VERSION = "2.1.1";
+my $VERSION = "2.1.2-dev";
 my $CONFIGDIR   = $ENV{CLIVESCAN_HOME}
     || File::Spec->catfile($ENV{HOME}, ".config/clive-utils");
 my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
