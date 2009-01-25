@@ -183,6 +183,9 @@ sub scan_page {
     $p->get_tag("title");
     my $pagetitle = $p->get_trimmed_text;
 
+    # TODO: Clean up, see clive commit c51da1cf48925b1d23f3210b0c273141174b221e
+    # to get started.
+
     my %re = (
         # in_scanurl: regex used to bind this search pattern to specified
         #   domain. Undefined for embedded link searches. See clivescan(1).
