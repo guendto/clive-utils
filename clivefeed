@@ -46,7 +46,7 @@ my %opted_mods = (Clipboard => 1, FontDialog => 1);
 eval "use Clipboard"; $opted_mods{Clipboard}      = 0 if $@;
 eval "use Tk::FontDialog"; $opted_mods{FontDialog} = 0 if $@;
 
-my $VERSION = "2.1.2-dev";
+my $VERSION = "2.1.2";
 my $CONFIGDIR   = $ENV{CLIVEFEED_HOME}
     || File::Spec->catfile($ENV{HOME}, ".config/clive-utils"); 
 my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
@@ -236,7 +236,7 @@ Copyright (c) 2008, 2009 Toni Gundogdu.
 Modules:
  * Config::Tiny/$Config::Tiny::VERSION\t\t* WWW::Curl/$WWW::Curl::VERSION
  * XML::RSS::LibXML/$XML::RSS::LibXML::VERSION\t* Clipboard/$clipb_v
- * Tk/$Tk::VERSION\t\t\t* URI::Escape/$URI::Escape::VERSION
+ * URI::Escape/$URI::Escape::VERSION\t\t* Tk/$Tk::VERSION
  * Tk::DialogBox/$Tk::DialogBox::VERSION\t\t* HTML::Strip/$HTML::Strip::VERSION
  * Tk::FontDialog/$fntdlg_v\t\t* Tk::Tree/$Tk::Tree::VERSION
 Core modules:
