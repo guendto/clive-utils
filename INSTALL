@@ -1,71 +1,67 @@
-Prerequisites
-------------------------------------------------------------------------------
 
- * clive >= 2.0.0  (http://clive.sourceforge.net)
- * Perl  >= 5.8    (http://perl.org)
+            clive-utils installation
 
-If a module is listed as "opt." (optional), this means that the utility
-works without it but some functionalities are disabled.
+ Normally you can do "make" and then "make install". That will build the
+ manual pages and install the scripts in your own ~/bin/ directory.
+ If you want to do a global install, you can do (as root):
 
-Most distros should have the modules listed below as installable packages.
-If this is not the case, you can install the missing modules from CPAN
-(http://cpan.org), e.g.:
-    % cpan install WWW::Curl # as root or sudo
+    # make prefix=/usr install
 
-clivefeed
----------
+ The manual pages are installed by default, if you do not need them:
 
-* Config::Tiny/2.12           * WWW::Curl/4.05
-* XML::RSS::LibXML/0.3002     * Clipboard/0.09 (opt.)
-* Tk/804.027                  * URI::Escape/3.29
-* Tk::DialogBox/4.013         * HTML::Strip/1.06
-* Tk::FontDialog/0.15 (opt.)  * Tk::Tree/4.005
+    # make WITH_MAN=no install
 
-  * Clipboard       -- affects --paste
-  * Tk::FontDialog  -- affects GUI font configuration
+ When you uninstall, be sure to use the same prefix. For example:
 
-clivescan
----------
+    # make prefix=/usr uninstall
 
-* Config::Tiny/2.12           * WWW::Curl/4.05
-* Tk/804.027                  * Tk::Tree/4.005
-* Tk::DialogBox/4.013         * Clipboard/0.09 (opt.)
-* Tk::FontDialog/0.15 (opt.)  * HTML::TokeParser/2.37
+ Developers may also find the following make target useful:
 
-  * Clipboard       -- affects --paste
-  * Tk::FontDialog  -- affects GUI font configuration
-
-clivepass
----------
-
-* Crypt::PasswdMD5/1.3        * Crypt::Twofish/2.12
-* Config::Tiny/2.12
+    man # generate clive.1 from clive (req. pod2man)
 
 
-Installation
-------------------------------------------------------------------------------
+            clive-utils prerequisites
 
-Extract:
-    % tar xvjf clive-utils-$release.tar.bz2
-    % cd clive-utils-$release
+ - Perl >= 5.8
+ - Config::Tiny
+ - WWW::Curl (4.05+)
+ - Tk 
+ - Tk::Tree
+ - Tk::DialogBox
+ - HTML::TokeParser
+ - XML::RSS::LibXML
+ - URI::Escape
+ - HTML::Strip
+ - Crypt::PasswdMD5
+ - Crypt::TwoFish
 
-Run:
-    If the path to clive(1) utility is not specified (e.g. --clive=path), the
-    clive-utils programs try to locate it in the $PATH.
-        % clivefeed [option]... [URL]...
-        % clivescan [option]... [URL]...
-        % clivepass [option]...
+ Optionally (the scripts run without them but some features will be disabled):
+ - Clipboard
+ - Tk::FontDialog
 
-Getting started:
-    The manual pages are written in Perl Pod markup language and they are
-    embedded in the script files. See "perldoc perlpod" for more info.
-    You can access the manual page by using the --manual option, e.g.:
-        % clivefeed --manual
+ Note that you can install these modules from CPAN, typically (as root):
 
-    Or you can use the pod2(man|text|latex|html) utilities to convert the
-    Pod to another format, e.g.:
-        % pod2man clivefeed > clivefeed.1
+   # cpan install $modulename
 
-    There is also the "genman" script which wraps the pod2man and produces
-    the manual pages with the most common options. This script is used to
-    generate the manual pages bundled with the source code.
+ Although many distros have made them available as packages.
+
+
+            Getting started with clive utilities
+
+ Typical use:
+
+    % clivescan "http://youtube.com"
+    % clivefeed "http://youtube.com/rss/user/communitychannel/videos.rss"
+
+ Be sure to read the manual pages also, e.g.:
+
+    % clivescan --manual
+    % man clivescan
+
+ See also the ./configrc file.
+
+
+            Installation examples
+
+ FreeBSD: gmake prefix=/usr/local mandir/usr/local/man install 
+ Debian:  make prefix=/usr

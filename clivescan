@@ -45,7 +45,8 @@ my %opted_mods = (Clipboard => 1);
 eval "use Clipboard";      $opted_mods{Clipboard}  = 0 if $@;
 eval "use Tk::FontDialog"; $opted_mods{FontDialog} = 0 if $@;
 
-my $VERSION = "2.1.2";
+use constant VERSION => "2.1.2";
+
 my $CONFIGDIR   = $ENV{CLIVESCAN_HOME}
     || File::Spec->catfile($ENV{HOME}, ".config/clive-utils");
 my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
@@ -374,26 +375,12 @@ sub run_clive {
 
 sub print_version {
     my $noexit  = shift;
-    my $perl_v  = sprintf "%vd", $^V;
-    my $clipb_v = $opted_mods{Clipboard} ? $Clipboard::VERSION : "-";
-    my $fntdlg_v= $opted_mods{FontDialog} ? $Tk::FontDialog::VERSION : "-";
-    my $s       = sprintf
-"clivescan version $VERSION  [$^O]
-Copyright (c) 2008, 2009 Toni Gundogdu.
- * Perl/$perl_v
-Modules:
- * Config::Tiny/$Config::Tiny::VERSION\t\t* WWW::Curl/$WWW::Curl::VERSION
- * Tk::Tree/$Tk::Tree::VERSION\t\t* Tk/$Tk::VERSION
- * Tk::DialogBox/$Tk::DialogBox::VERSION\t\t* Clipboard/$clipb_v
- * Tk::FontDialog/$fntdlg_v\t\t* HTML::TokeParser/$HTML::TokeParser::VERSION
-Core modules:
- * Getopt::Long/$Getopt::Long::VERSION\t\t* Digest::SHA/$Digest::SHA::VERSION
- * File::Spec/$File::Spec::VERSION\t\t* File::Find/$File::Find::VERSION
- * File::Path/$File::Path::VERSION\t\t* Encode/$Encode::VERSION
- * Pod::Usage/$Pod::Usage::VERSION\t\t* Cwd/$Cwd::VERSION
-";
-return $s if $noexit;
-print $s; exit;
+    my $s       = sprintf 
+        "clivescan ".VERSION.". Copyright (c) 2008-2009 Toni Gundogdu.\n"
+      . "clivescan is licensed under the ISC license which is functionally\n"
+      . "equivalent to the 2-clause BSD licence.\n";
+    return $s if $noexit;
+    print  $s; exit;
 }
 
 

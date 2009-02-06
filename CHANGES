@@ -1,6 +1,8 @@
 Version 2.1.2
 
  Developer-visible changes:
+  * Added a rudimentary GNU Makefile
+  * Removed genman (use "make man" instead)
   * Added tests/scan/youtube-playlist.url
   - clivefeed | clivescan
   * Fixed: clive process spawning: parent process no longer waits for child,
