@@ -55,7 +55,7 @@ pod2usage(-exitstatus => 0, -verbose => 2) if $opts{manual};
 main();
 
 sub main {
-    mkpath( [$CONFIGDIR], 1, 0700 );
+    mkpath( [$CONFIGDIR], 0, 0700 );
 
     if    ( $opts{add} )    { add_login(); }
     elsif ( $opts{create} ) { create_passwd(); }
