@@ -34,7 +34,7 @@ RELEASE_pass := \
 all: man
 
 .PHONY: install uninstall
-install: all
+install:
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	$(INSTALL) -c clivescan $(DESTDIR)$(bindir)/clivescan
 	$(INSTALL) -c clivefeed $(DESTDIR)$(bindir)/clivefeed
