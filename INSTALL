@@ -35,9 +35,11 @@
  - Crypt::PasswdMD5
  - Crypt::TwoFish
 
- Optionally (the scripts run without them but some features will be disabled):
- - Clipboard
- - Tk::FontDialog
+ Optional:
+ - Clipboard # --paste
+ - Tk::FontDialog # GUI Prefs => change font
+
+ The scripts run without the above modules but some features will be disabled.
 
  Note that you can install these modules from CPAN, typically (as root):
 
