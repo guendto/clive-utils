@@ -1,3 +1,14 @@
+Version 2.1.3
+
+ User-visible changes:
+  - clivescan
+  * Butchered --help output
+    - much less verbose now
+    - relocated manual page data to clivescan.pod
+  * Removed --manual option
+
+ Developer-visible changes:
+
 Version 2.1.2
 (February 6, 2009)
 
