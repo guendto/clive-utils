@@ -87,7 +87,7 @@ $opts{mainfont} = $opts{mainfont} || "{helvetica} -12 bold";
 
 GetOptions(\%opts,
     'debug|d', 'help|h',  'version|v',  'all|a',   'agent|U=s',
-    'paste|x', 'quiet|q', 'clive|c=s', 'opts|o=s', 'proxy|y=s',
+    'paste|p', 'quiet|q', 'clive|c=s', 'opts|o=s', 'proxy|y=s',
     # Workaround since '$longopt|shortopt' is a no-no.
     'no-proxy|X' => sub { $opts{proxy} = ""; },
 ) or exit(1);
@@ -544,6 +544,7 @@ clivefeed [option]... [URL]...
  -c, --clive=PATH       path to clive(1) command
  -o, --opts=OPTIONS     options passed to clive(1) command
  -a, --all              extract all videos without prompting
+ -p, --paste            paste input data from clipboard
  -U, --agent=STRING     identify as STRING to http server
  -y, --proxy=ADDR       use address for http proxy
  -X, --no-proxy         do not use http proxy

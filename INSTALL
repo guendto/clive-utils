@@ -59,9 +59,3 @@
     % man clivescan
 
  See also the ./configrc file.
-
-
-            Installation examples
-
- FreeBSD: gmake prefix=/usr/local mandir/usr/local/man install 
- Debian:  make prefix=/usr

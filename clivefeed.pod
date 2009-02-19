@@ -49,6 +49,10 @@ options.
 
 Grab all videos without prompting the GUI.
 
+=item B<-p, --paste>
+
+Paste URL input data from clipboard.
+
 =back
 
 B<HTTP Options>

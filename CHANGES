@@ -1,6 +1,8 @@
 Version 2.1.3
 
  User-visible changes:
+  * Added undocumented --paste option to clivescan.1 and clivefeed.1
+  * Renamed --paste short option from '-x' to '-p'
   * Fixed clivepass --version which would print "try --help for more info."
   * Renamed the following options
     - --noproxy => --no-proxy (clivescan, clivefeed)

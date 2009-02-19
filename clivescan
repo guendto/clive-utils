@@ -83,8 +83,8 @@ $opts{strict}   = 1;
 $opts{mainfont} = $opts{mainfont} || "{helvetica} -12 bold";
 
 GetOptions(\%opts,
-    'debug|d', 'help|h',  'version|v',  'all|a',   'agent|U=s',
-    'paste|x', 'quiet|q', 'clive|c=s', 'opts|o=s', 'proxy|y=s',
+    'debug|d', 'help|h',  'version|v', 'all|a',    'agent|U=s',
+    'paste|p', 'quiet|q', 'clive|c=s', 'opts|o=s', 'proxy|y=s',
     # Workaround since '$longopt|shortopt' is a no-no.
     'no-proxy|X'  => sub { $opts{proxy} = "" },
     'no-strict|n' => sub { $opts{strict} = 0 },
@@ -648,6 +648,7 @@ clivescan [option]... [URL]...
  -o, --opts=OPTIONS     options passed to clive(1) command
  -a, --all              extract all videos without prompting
  -n, --no-strict        work around host specific search pattern issues
+ -p, --paste            paste input data from clipboard
  -U, --agent=STRING     identify as STRING to http server
  -y, --proxy=ADDR       use address for http proxy
  -X, --no-proxy         do not use http proxy

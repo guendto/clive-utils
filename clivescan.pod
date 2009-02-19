@@ -63,6 +63,10 @@ be found in the URL. To override this restrictive default behaviour:
 
  % clivescan -S "http://video.google.com/videosearch?q=inurl%3Abreak"
 
+=item B<-p, --paste>
+
+Paste URL input data from clipboard.
+
 =back
 
 B<HTTP Options>
