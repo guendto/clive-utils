@@ -1,9 +1,9 @@
 
             clive-utils installation
 
- Normally you can do "make" and then "make install". That will build the
- manual pages and install the scripts in your own ~/bin/ directory.
- If you want to do a global install, you can do (as root):
+ Normally you can do "make install". This will install the scripts
+ in your own ~/bin/ directory. If you want to do a global install,
+ you can do (as root):
 
     # make prefix=/usr install
 
