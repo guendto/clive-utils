@@ -9,7 +9,9 @@ datadir     = $(datarootdir)
 mandir      = $(datarootdir)/man
 man1dir     = $(mandir)/man1
 
-INSTALL     = install
+INSTALL     = install -c
+INSTALL_D   = install -d
+INSTALL_M   = install -c -m 444
 RM          = rm -f
 PERL        = perl
 POD2MAN     = pod2man
@@ -35,15 +37,15 @@ all:
 
 .PHONY: install uninstall
 install:
-	$(INSTALL) -d $(DESTDIR)$(bindir)
-	$(INSTALL) -c clivescan $(DESTDIR)$(bindir)/clivescan
-	$(INSTALL) -c clivefeed $(DESTDIR)$(bindir)/clivefeed
-	$(INSTALL) -c clivepass $(DESTDIR)$(bindir)/clivepass
+	$(INSTALL_D) $(DESTDIR)$(bindir)
+	$(INSTALL) clivescan $(DESTDIR)$(bindir)/clivescan
+	$(INSTALL) clivefeed $(DESTDIR)$(bindir)/clivefeed
+	$(INSTALL) clivepass $(DESTDIR)$(bindir)/clivepass
 ifeq ($(WITH_MAN),yes)
-	$(INSTALL) -d $(DESTDIR)$(man1dir)
-	$(INSTALL) -c -m 444 clivescan.1 $(DESTDIR)$(man1dir)/clivescan.1
-	$(INSTALL) -c -m 444 clivefeed.1 $(DESTDIR)$(man1dir)/clivefeed.1
-	$(INSTALL) -c -m 444 clivepass.1 $(DESTDIR)$(man1dir)/clivepass.1
+	$(INSTALL_D) $(DESTDIR)$(man1dir)
+	$(INSTALL_M) clivescan.1 $(DESTDIR)$(man1dir)/clivescan.1
+	$(INSTALL_M) clivefeed.1 $(DESTDIR)$(man1dir)/clivefeed.1
+	$(INSTALL_M) clivepass.1 $(DESTDIR)$(man1dir)/clivepass.1
 endif
 
 uninstall:
