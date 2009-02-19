@@ -1,6 +1,7 @@
 Version 2.1.3
 
  User-visible changes:
+  * Fixed clivepass --version which would print "try --help for more info."
   * Renamed the following options
     - --noproxy => --no-proxy (clivescan, clivefeed)
     - --nostrict => --no-strict (clivescan)

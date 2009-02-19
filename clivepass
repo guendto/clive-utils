@@ -46,9 +46,10 @@ my $PASSWDFILE  = File::Spec->catfile($CONFIGDIR, "passwd");
 my %opts;
 GetOptions(\%opts,
     'create|c', 'add|a=s',  'get|g=s', 'edit|e=s', 'delete|d=s',
-    'show|s',   'help|h',   'version|v' => \&print_version,
+    'show|s',   'help|h',   'version|v',
 ) or exit(1);
 
+print_version() if $opts{version};
 pod2usage(-exitstatus => 0, -verbose => 1) if $opts{help};
 
 main();
