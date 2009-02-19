@@ -13,6 +13,10 @@ Version 2.1.3
   * Removed --manual option (all)
 
  Developer-visible changes:
+  * Makefile changes
+    - target man: pod2man from the separate pod files
+    - removed "man" from "all" (manpages are part of distro/repo)
+    - removed "clean" target (useless)
 
 
 Version 2.1.2
