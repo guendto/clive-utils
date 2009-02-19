@@ -1,13 +1,15 @@
 Version 2.1.3
 
  User-visible changes:
-  - clivescan
+  - clivescan, clivefeed
   * Renamed the following options
     - --noproxy => --no-proxy
-    - --nostrict => --no-strict
+    - --nostrict => --no-strict (clivescan)
   * Butchered --help output
     - much less verbose now
-    - relocated manual page data to clivescan.pod
+    - relocated manual page data to separate pod files
+      - clivescan.pod
+      - clivefeed.pod
   * Removed --manual option
 
  Developer-visible changes:

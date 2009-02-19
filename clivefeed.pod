@@ -1,0 +1,151 @@
+=head1 NAME
+
+clivefeed - the feed parsing utility for clive
+
+=head1 SYNOPSIS
+
+clivefeed [option]... [URL]...
+
+=head1 DESCRIPTION
+
+clivefeed is an utility that parses RSS feeds containing video page links and
+uses L<clive(1)> to extract them.
+
+Historically, the feed parsing function was part of L<clive(1)>
+and it was written in Python/Newt. The clivefeed utility was written
+in Perl/Tk to replace the feature that was removed in clive 2.0. This
+utility is part of the B<clive-utils> project.
+
+=head1 OPTIONS
+
+You may freely specify options after the command-line arguments. For example:
+
+    % clivefeed -a URL --opts=--no-extract
+
+B<Basic Options>
+
+=over 4
+
+=item B<-h --help>
+
+Show help and exit.
+
+=item B<-v --version>
+
+Show version and exit.
+
+=item B<-c --clive=>I<path>
+
+I<path> to L<clive(1)> command. If unspecified, clivefeed will attempt to
+locate it in the $PATH. Additionally, the B<CLIVE_PATH> environment variable
+can be used. See also L</CONFIG>. 
+
+=item B<-o --opts=>I<opts>
+
+I<opts> to append to clive call. See L<clive(1)> for more on the available
+options.
+
+=item B<-a --all>
+
+Grab all videos without prompting the GUI.
+
+=back
+
+B<HTTP Options>
+
+=over 4
+
+=item B<-U --agent=>I<string>
+
+Identify as I<string> to the HTTP server. Defaults to "Mozilla/5.0".
+
+=item B<-y --proxy=>I<address>
+
+Use I<address> for HTTP proxy, e.g. http://foo:1234. If http_proxy
+environment variable is defined, it will be used.
+
+=item B<-X --no-proxy>
+
+Do not use the defined HTTP proxy (B<--proxy>, config or http_proxy).
+
+=back
+
+=head1 EXAMPLES
+
+=over 4
+
+=item % clivefeed "http://youtube.com/rss/user/communitychannel/videos.rss"
+
+Parses the feed at the specified URL.
+
+=item % cat E<gt>E<gt> url.lst
+
+ http://youtube.com/rss/user/googletechtalks/videos.rss
+ http://youtube.com/rss/user/theonion/videos.rss
+ http://youtube.com/rss/user/lisanova/videos.rss
+ http://youtube.com/rss/user/clipcritics/videos.rss
+ http://youtube.com/rss/user/communitychannel/videos.rss
+ http://youtube.com/rss/user/manintheboxshow/videos.rss
+
+=item % cat url.lst | clivefeed
+
+Reads input from UNIX pipe.
+
+=item % clivefeed --opts="-f mp4"
+
+Append the I<opts> to the L<clive(1)> call.
+
+=item % clivefeed --all URL
+
+Grabs all found videos without prompting.
+
+=back
+
+=head1 FILES
+
+clivefeed searches the ~/.config/clive-utils directory for the config file.
+You can override this by setting the B<CLIVEFEED_HOME> environment variable.
+
+=over 4
+
+=item ~/.config/clive-utils/config
+
+Configuration file.
+
+=item ~/.config/clive-utils/feed.prefs
+
+GUI preferences (e.g. fonts, window position, sash coords, ...).
+
+=back
+
+=head1 CONFIG
+
+ ## Example config file for clivefeed.
+
+ [clive]
+   path = /usr/local/bin/clive
+   opts = -f mp4
+
+ [http]
+   agent = Mozilla/5.0
+   proxy = http://foo:1234
+
+=head1 SEE ALSO
+
+L<clive(1)> L<clivescan(1)>
+
+=head1 OTHER
+
+Project: http://googlecode.com/p/clive-utils/
+
+A clive-utils development repository can be obtained from:
+
+    % git clone git://repo.or.cz/clive-utils.git
+
+Patches welcome.
+
+=head1 AUTHOR
+
+Written by Toni Gundogdu <legatvs@gmail.com>
+
+=cut
