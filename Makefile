@@ -31,7 +31,7 @@ RELEASE_pass := \
         $(TR) -d '[\";]'")
 
 .PHONY: all
-all: man
+all:
 
 .PHONY: install uninstall
 install:
@@ -59,11 +59,8 @@ endif
 .PHONY: man clean
 man:
 	$(POD2MAN) -c "clivescan manual" -n clivescan \
-		-s 1 -r $(RELEASE_scan) clivescan clivescan.1
+		-s 1 -r $(RELEASE_scan) clivescan.pod clivescan.1
 	$(POD2MAN) -c "clivefeed manual" -n clivefeed \
-		-s 1 -r $(RELEASE_feed) clivefeed clivefeed.1
+		-s 1 -r $(RELEASE_feed) clivefeed.pod clivefeed.1
 	$(POD2MAN) -c "clivepass manual" -n clivepass \
-		-s 1 -r $(RELEASE_pass) clivescan clivepass.1
-
-clean:
-	@$(RM) clivescan.1 clivefeed.1 clivepass.1 2>/dev/null
+		-s 1 -r $(RELEASE_pass) clivescan.pod clivepass.1
