@@ -1,0 +1,99 @@
+=head1 NAME
+
+clivepass - the login password utility for clive
+
+=head1 SYNOPSIS
+
+clivepass [option]...
+
+=head1 DESCRIPTION
+
+clivepass is an utility that can be used to create and change passwords
+for websites used by L<clive(1)>. The passwords are encrypted and saved
+along with the username information. Access is restricted by using a
+global passphrase.
+
+Historically, a similar utility, clive-passwd, was part of clive 1.x but
+was written in Python instead of Perl.
+
+=head1 OPTIONS
+
+B<Basic Options>
+
+=over 4
+
+=item B<-h --help>
+
+Show help and exit.
+
+=item B<-v --version>
+
+Show version and exit.
+
+=item B<-c --create>
+
+Create a new passwd file. See also L</FILES>.
+
+=item B<-a --add=>I<username>
+
+Add a new login for I<username>.
+
+=item B<-e --edit=>I<username>
+
+Change login password for I<username>.
+
+=item B<-g --get=>I<username>
+
+Dump I<username> decrypted login password to stdout.
+
+=item B<-s --show>
+
+Dump all saved login usernames to stdout.
+
+=item B<-d --delete=>I<username>
+
+Delete I<username> from passwd file.
+
+=back
+
+=head1 EXAMPLES
+
+=over 4
+
+=item % clivepass -a myusername
+
+=item % clivepass -g myusername
+
+=back
+
+=head1 FILES
+
+clivepass searches the ~/.config/clive-utils directory for the config file.
+You can override this by setting the B<CLIVEPASS_HOME> environment variable.
+
+=over 4
+
+=item ~/.config/clive-utils/passwd
+
+Password file. Contains the salted passphrase hash and login usernames and
+encrypted passwords.
+
+=head1 SEE ALSO
+
+L<clive(1)> L<clivescan(1)> L<clivefeed(1)>
+
+=head1 OTHER
+
+Project: http://googlecode.com/p/clive-utils/
+
+A clive-utils development repository can be obtained from:
+
+    % git clone git://repo.or.cz/clive-utils.git
+
+Patches welcome.
+
+=head1 AUTHOR
+
+Written by Toni Gundogdu <legatvs@gmail.com>
+
+=cut
