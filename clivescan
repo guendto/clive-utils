@@ -195,7 +195,7 @@ sub scan_page {
         # most of the supported hosts refer to their videos using local
         # paths, e.g. <a href="/watch?v=...">.
         Youtube => {
-            in_scanurl => qr|\Qyoutube.com\E|i,
+            in_scanurl => qr|youtube.com|i,
             search_for => qr|\Q/watch?v=\E(.*?)["< &#%]|i,
             url_prefix => "http://youtube.com/watch?v=",
         },
@@ -205,7 +205,7 @@ sub scan_page {
             url_prefix => "http://youtube.com/watch?v=",
         },
         GVideo => { # NOTE: Ignores original TLD, uses .com for extraction
-            in_scanurl => qr|\Qvideo.google.\E|i,
+            in_scanurl => qr|video.google.|i,
             search_for => qr|\Q/videoplay?docid=\E(.*?)["< &#%]|i,
             url_prefix => "http://video.google.com/videoplay?docid=",
         },
@@ -215,7 +215,7 @@ sub scan_page {
             url_prefix => "http://video.google.com/videoplay?docid=",
         },
 #        Metacafe => { # NOTE: metacafe.com/watch/$id is enough for redirect
-#            in_scanurl => qr|\Qmetacafe.com\E|i,
+#            in_scanurl => qr|metacafe.com|i,
 #            search_for => qr|\Q/watch/\E(.*?)/|i,
 #            url_prefix => "http://metacafe.com/watch/",
 #        },
@@ -225,7 +225,7 @@ sub scan_page {
 #            url_prefix => "http://metacafe.com/watch/",
 #        },
         SevenLoad => { # NOTE: Ditto. Subdomain can be ignored.
-            in_scanurl => qr|\Qsevenload.com\E|i,
+            in_scanurl => qr|sevenload.com|i,
             search_for => qr|\Q/videos/\E(.*?)\-|i,
             url_prefix => "http://sevenload.com/videos/",
         },
@@ -235,12 +235,12 @@ sub scan_page {
             url_prefix => "http://sevenload.com/videos/",
         },
         LastfmYoutube => { # Lastfm wraps some of the Youtube videos
-            in_scanurl => qr|\Qlast.fm\E|i,
+            in_scanurl => qr|last.fm|i,
             search_for => qr|\Q/+videos/\E\Q+1-\E(.*?)["< &#%]|i,
             url_prefix => "http://youtube.com/watch?v=",
         },
         Break => {
-            in_scanurl => qr|\Qbreak.com\E|i,
+            in_scanurl => qr|break.com|i,
             search_for => qr|\Q/index/\E(.*?)["< &#%]|i,
             url_prefix => "http://break.com/index/",
         },
@@ -248,7 +248,7 @@ sub scan_page {
         # Page  URL: http://break.com/index/if-all-movies-had-cell-phones.html
         # Embed URL: http://embed.break.com/600081
         Liveleak => {
-            in_scanurl => qr|\Qliveleak.com\E|i,
+            in_scanurl => qr|liveleak.com|i,
             search_for => qr|\Q/view?i=\E(.*?)["< &#%]|i,
             url_prefix => "http://liveleak.com/view?i=",
         },
