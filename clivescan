@@ -364,10 +364,10 @@ sub run_clive {
     my $pid = fork;
     if ($pid < 0) {
         print STDERR "error: fork failed: $!\n";
-        exit 1;
+        exit(1);
     } elsif ($pid != 0) {
         exec "$opts{clive} $opts{opts} " . join(' ',@q)
-            or print STDERR "error: exec failed: $!\n" and exit;
+            or print STDERR "error: exec failed: $!\n" and exit(1);
     }
 }
 
@@ -395,7 +395,7 @@ sub init_gui {
     $mw = MainWindow->new;
     $mw->geometry($opts{geometry}) if defined $opts{geometry};
     $mw->title('clivescan');
-    $mw->protocol('WM_DELETE_WINDOW', sub { save_prefs(); exit; });
+    $mw->protocol('WM_DELETE_WINDOW', sub { save_prefs(); $mw->destroy });
 
     # Menubar
     my $mb = $mw->Menu;
@@ -407,7 +407,7 @@ sub init_gui {
          -command =>  \&on_extract);
     $file->separator;
     $file->command(-label => '~Quit', 
-        -command => sub { save_prefs(); exit; } );
+        -command => sub { save_prefs(); $mw->destroy } );
 
     # Menu: Edit
     if ( $opted_mods{FontDialog} ) {
