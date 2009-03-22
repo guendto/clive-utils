@@ -65,4 +65,4 @@ man:
 	$(POD2MAN) -c "clivefeed manual" -n clivefeed \
 		-s 1 -r $(RELEASE_feed) clivefeed.pod clivefeed.1
 	$(POD2MAN) -c "clivepass manual" -n clivepass \
-		-s 1 -r $(RELEASE_pass) clivescan.pod clivepass.1
+		-s 1 -r $(RELEASE_pass) clivepass.pod clivepass.1
