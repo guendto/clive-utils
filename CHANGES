@@ -1,6 +1,8 @@
 Version 2.1.4
 
  User-visible changes:
+  * Change Tk module importing (related to optimizations, see further below)
+    - Users without X can now use clivefeed and clivescan scripts with --all
   * Fix clivepass.1 manual page
     - Makefile generated incorrectly clivepass.1 from clivescan.pod
   * Update manual pages (all)
