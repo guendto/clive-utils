@@ -72,14 +72,13 @@ my $prefs = Config::Tiny->read($PREFSFILE);
 $opts{mainfont} = $opts{mainfont} || "{helvetica} -12 bold";
 
 GetOptions(\%opts,
-    'debug|d', 'help|h',  'version|v',  'all|a',   'agent|U=s',
-    'paste|p', 'quiet|q', 'clive|c=s', 'opts|o=s', 'proxy|y=s',
-    # Workaround since '$longopt|shortopt' is a no-no.
+    'debug|d', 'help|h',  'version|v',  'all|a',    'agent|U=s',
+    'paste|p', 'quiet|q', 'clive|c=s',  'opts|o=s', 'proxy|y=s',
+    'version|v' => \&print_version,
+    # Workaround: longopt|shortopt! not supported
     'no-proxy|X' => sub { $opts{proxy} = ""; },
 ) or exit(1);
 
-# Since 'version|v' => \&print_version and exit cannot tango with tk
-print_version(0) if $opts{version}; 
 if ($opts{help}) {
     require Pod::Usage;
     Pod::Usage::pod2usage(-exitstatus => 0, -verbose => 1);
@@ -212,10 +211,10 @@ sub run_clive {
     my $pid = fork;
     if ($pid < 0) {
         print STDERR "error: fork failed: $!\n";
-        exit 1;
+        exit(1);
     } elsif ($pid != 0) {
         exec "$opts{clive} $opts{opts} " . join(' ',@q)
-            or print STDERR "error: exec failed: $!\n" and exit;
+            or print STDERR "error: exec failed: $!\n" and exit(1);
     }
 }
 
@@ -256,7 +255,7 @@ sub init_gui {
          -command =>  \&on_extract);
     $file->separator;
     $file->command(-label => '~Quit',
-        -command => sub { save_prefs(); exit; } );
+        -command => sub { save_prefs(); $mw->destroy } );
 
     # Menu: Edit
     if ( $opted_mods{FontDialog} ) {
