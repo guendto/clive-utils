@@ -129,30 +129,23 @@
 .\" ========================================================================
 .\"
 .IX Title "clivepass 1"
-.TH clivepass 1 "2009-03-22" "2.1.4" "clivepass manual"
+.TH clivepass 1 "2009-02-19" "2.1.4" "clivepass manual"
 .SH "NAME"
-clivescan \- the video link scanning utility for clive
+clivepass \- the login password utility for clive
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-clivescan [option]... [\s-1URL\s0]...
+clivepass [option]...
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
-clivescan is an utility that scans video pages for video links and
-uses \fIclive\fR\|(1) to extract them. The utility scans for video page
-and embedded video links.
+clivepass is an utility that can be used to create and change passwords
+for websites used by \fIclive\fR\|(1). The passwords are encrypted and saved
+along with the username information. Access is restricted by using a
+global passphrase.
 .PP
-Historically, the video link scanning function was part of \fIclive\fR\|(1)
-and it was written in Python/Newt. The clivescan utility was written
-in Perl/Tk to replace the feature that was removed in clive 2.0. This
-utility is part of the \fBclive-utils\fR project.
+Historically, a similar utility, clive\-passwd, was part of clive 1.x but
+was written in Python instead of Perl.
 .SH "OPTIONS"
 .IX Header "OPTIONS"
-You may freely specify options after the command-line arguments. For example:
-.PP
-.Vb 1
-\&    % clivescan -a URL --opts=--noextract
-.Ve
-.PP
 \&\fBBasic Options\fR
 .IP "\fB\-h \-\-help\fR" 4
 .IX Item "-h --help"
@@ -160,113 +153,53 @@ Show help and exit.
 .IP "\fB\-v \-\-version\fR" 4
 .IX Item "-v --version"
 Show version and exit.
-.IP "\fB\-c \-\-clive=\fR\fIpath\fR" 4
-.IX Item "-c --clive=path"
-\&\fIpath\fR to \fIclive\fR\|(1) command. If unspecified, clivescan will attempt to
-locate it in the \f(CW$PATH\fR. Additionally, the \fB\s-1CLIVE_PATH\s0\fR environment variable
-can be used. See also \*(L"\s-1CONFIG\s0\*(R". 
-.IP "\fB\-o \-\-opts=\fR\fIopts\fR" 4
-.IX Item "-o --opts=opts"
-\&\fIopts\fR to append to clive call. See \fIclive\fR\|(1) for more on the available
-options.
-.IP "\fB\-a \-\-all\fR" 4
-.IX Item "-a --all"
-Grab all videos without prompting the \s-1GUI\s0. Note that users without X can use
-this option to workaround the X requirement.
-.IP "\fB\-n \-\-no\-strict\fR" 4
-.IX Item "-n --no-strict"
-This option provides a workaround for some search pattern issues that
-are known to occur. For example:
-.Sp
-.Vb 1
-\& % clivescan "http://video.google.com/videosearch?q=inurl%3Abreak"
-.Ve
-.Sp
-Does not return any break.com videos even though the page lists them.
-This happens because clivescan assumes that the domain break.com can
-be found in the \s-1URL\s0. To override this restrictive default behaviour:
-.Sp
-.Vb 1
-\& % clivescan -S "http://video.google.com/videosearch?q=inurl%3Abreak"
-.Ve
-.IP "\fB\-p, \-\-paste\fR" 4
-.IX Item "-p, --paste"
-Paste \s-1URL\s0 input data from clipboard.
-.PP
-\&\fB\s-1HTTP\s0 Options\fR
-.IP "\fB\-U \-\-agent=\fR\fIstring\fR" 4
-.IX Item "-U --agent=string"
-Identify as \fIstring\fR to the \s-1HTTP\s0 server. Defaults to \*(L"Mozilla/5.0\*(R".
-.IP "\fB\-y \-\-proxy=\fR\fIaddress\fR" 4
-.IX Item "-y --proxy=address"
-Use \fIaddress\fR for \s-1HTTP\s0 proxy, e.g. http://foo:1234. If http_proxy
-environment variable is defined, it will be used.
-.IP "\fB\-X \-\-no\-proxy\fR" 4
-.IX Item "-X --no-proxy"
-Do not use the defined \s-1HTTP\s0 proxy (\fB\-\-proxy\fR, config or http_proxy).
+.IP "\fB\-c \-\-create\fR" 4
+.IX Item "-c --create"
+Create a new passwd file. See also \*(L"\s-1FILES\s0\*(R".
+.IP "\fB\-a \-\-add=\fR\fIusername\fR" 4
+.IX Item "-a --add=username"
+Add a new login for \fIusername\fR.
+.IP "\fB\-e \-\-edit=\fR\fIusername\fR" 4
+.IX Item "-e --edit=username"
+Change login password for \fIusername\fR.
+.IP "\fB\-g \-\-get=\fR\fIusername\fR" 4
+.IX Item "-g --get=username"
+Dump \fIusername\fR decrypted login password to stdout.
+.IP "\fB\-s \-\-show\fR" 4
+.IX Item "-s --show"
+Dump all saved login usernames to stdout.
+.IP "\fB\-d \-\-delete=\fR\fIusername\fR" 4
+.IX Item "-d --delete=username"
+Delete \fIusername\fR from passwd file.
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
-.IP "% clivescan youtube.com video.google.com" 4
-.IX Item "% clivescan youtube.com video.google.com"
-Scans both, Youtube and GoogleVideo front pages for video links.
-.IP "% cat >> url.lst" 4
-.IX Item "% cat >> url.lst"
-.Vb 4
-\& http://video.google.com
-\& http://youtube.com/communitychannel
-\& http://sevenload.com
-\& http://break.com
-.Ve
-.IP "% cat url.lst | clivescan" 4
-.IX Item "% cat url.lst | clivescan"
-Reads input from \s-1UNIX\s0 pipe.
-.ie n .IP "% clivescan \-\-opts=""\-f mp4""" 4
-.el .IP "% clivescan \-\-opts=``\-f mp4''" 4
-.IX Item "% clivescan --opts=-f mp4"
-Appends the \fIopts\fR to the \fIclive\fR\|(1) call.
-.IP "% clivescan \-\-all http://youtube.com" 4
-.IX Item "% clivescan --all http://youtube.com"
-Grabs all found videos from the Youtube front page.
+.IP "% clivepass \-a myusername" 4
+.IX Item "% clivepass -a myusername"
+.PD 0
+.IP "% clivepass \-g myusername" 4
+.IX Item "% clivepass -g myusername"
+.PD
 .SH "FILES"
 .IX Header "FILES"
-clivescan searches the ~/.config/clive\-utils directory for the config file.
-You can override this by setting the \fB\s-1CLIVESCAN_HOME\s0\fR environment variable.
-.IP "~/.config/clive\-utils/config" 4
-.IX Item "~/.config/clive-utils/config"
-Configuration file.
-.IP "~/.config/clive\-utils/scan.prefs" 4
-.IX Item "~/.config/clive-utils/scan.prefs"
-\&\s-1GUI\s0 preferences (e.g. fonts, window position, sash coords, ...).
-.SH "CONFIG"
-.IX Header "CONFIG"
-.Vb 1
-\& ## Example config file for clivescan.
-.Ve
-.PP
-.Vb 3
-\& [clive]
-\&   path = /usr/local/bin/clive
-\&   opts = -f mp4
-.Ve
-.PP
-.Vb 3
-\& [http]
-\&   agent = Mozilla/5.0
-\&   proxy = http://foo:1234
-.Ve
+clivepass searches the ~/.config/clive\-utils directory for the config file.
+You can override this by setting the \fB\s-1CLIVEPASS_HOME\s0\fR environment variable.
+.IP "~/.config/clive\-utils/passwd" 4
+.IX Item "~/.config/clive-utils/passwd"
+Password file. Contains the salted passphrase hash and login usernames and
+encrypted passwords.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIclive\fR\|(1) \fIclivefeed\fR\|(1)
+\&\fIclive\fR\|(1) \fIclivescan\fR\|(1) \fIclivefeed\fR\|(1)
 .SH "OTHER"
 .IX Header "OTHER"
 Project: http://googlecode.com/p/clive\-utils/
-.PP
+.Sp
 A clive-utils development repository can be obtained from:
-.PP
+.Sp
 .Vb 1
 \&    % git clone git://repo.or.cz/clive-utils.git
 .Ve
-.PP
+.Sp
 Patches welcome.
 .SH "AUTHOR"
 .IX Header "AUTHOR"
