@@ -47,7 +47,8 @@ options.
 
 =item B<-a --all>
 
-Grab all videos without prompting the GUI.
+Grab all videos without prompting the GUI. Note that users without X can use
+this option to workaround the X requirement.
 
 =item B<-p, --paste>
 
