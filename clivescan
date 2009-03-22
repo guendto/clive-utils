@@ -32,7 +32,7 @@ use File::Spec;
 use Encode;
 
 # Non-essentials
-my %opted_mods = (Clipboard => 1);
+my %opted_mods = (Clipboard => 1, FontDialog => 1);
 eval "use Clipboard"; $opted_mods{Clipboard} = 0 if $@;
 
 my $CONFIGDIR   = $ENV{CLIVESCAN_HOME}
