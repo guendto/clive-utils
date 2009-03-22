@@ -3,7 +3,9 @@ Version 2.1.4
  User-visible changes:
   * Fix clivepass.1 manual page
     - Makefile generated incorrectly clivepass.1 from clivescan.pod
-  * Touch manual pages (all)
+  * Update manual pages (all)
+    - Generate clivepass.1 from clivepass.pod (see above)
+    - Update --all descriptions
   * Change warning and error messages (clivepass)
   * Fix Edit / Preferences (clivescan)
     - Menu did not appear even when Tk::FontDialog was installed
@@ -12,7 +14,8 @@ Version 2.1.4
   * Optimize script start (all)
     - Replace "use $module" with "require $module" where possible
     - Should improve script start time
-  * Touch LICENSE
+  * Update LICENSE
+    - Cosmetic changes
 
 Version 2.1.3
 (February 19, 2009)
