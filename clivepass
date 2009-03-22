@@ -21,23 +21,13 @@
 use warnings;
 use strict;
 
+use constant VERSION => "2.1.4";
+
 binmode(STDOUT, ":utf8");
-
-use Crypt::PasswdMD5 qw(unix_md5_crypt);
-use Crypt::Twofish;
-use Config::Tiny;
-
-# Core modules:
-use MIME::Base64 qw(encode_base64 decode_base64);
 use Getopt::Long qw(:config bundling);
-use Pod::Usage qw(pod2usage);
-use Digest::MD5 qw(md5_hex);
-use File::Path qw(mkpath);
-use File::Find qw(find);
+use Config::Tiny;
 use File::Spec;
 use Encode;
-
-use constant VERSION => "2.1.4";
 
 my $CONFIGDIR   = $ENV{CLIVEPASS_HOME}
     || File::Spec->catfile($ENV{HOME}, ".config/clive-utils");
@@ -50,14 +40,21 @@ GetOptions(\%opts,
 ) or exit(1);
 
 print_version() if $opts{version};
-pod2usage(-exitstatus => 0, -verbose => 1) if $opts{help};
+if ($opts{help}) {
+    require Pod::Usage;
+    Pod::Usage::pod2usage(-exitstatus => 0, -verbose => 1);
+}
 
 main();
 
 
 sub main {
-    mkpath( [$CONFIGDIR], 0, 0700 );
+    require File::Path;
+    File::Path::mkpath([$CONFIGDIR], 0, 0700);
 
+    require Crypt::PasswdMD5;
+    require Crypt::Twofish;
+    require MIME::Base64;
     if    ( $opts{add} )    { add_login(); }
     elsif ( $opts{create} ) { create_passwd(); }
     elsif ( $opts{edit} )   { edit_login(); }
@@ -93,7 +90,8 @@ sub create_passwd {
         unless $phrase eq $again;
 
     my $passwd = Config::Tiny->new;
-    $passwd->{_}->{phrase} = unix_md5_crypt($phrase, salt(8));
+    $passwd->{_}->{phrase} =
+        Crypt::PasswdMD5::unix_md5_crypt($phrase, salt(8));
     $passwd->write($PASSWDFILE);
 
     return ( passwd => $passwd, phrase => $phrase );
@@ -108,7 +106,8 @@ sub verify_phrase {
     my $phrase;
     $phrase = getpass("Enter passphrase: ") while ( ! $phrase );
 
-    if ( unix_md5_crypt($phrase, $phrase_hash) ne $phrase_hash ) {
+    if (Crypt::PasswdMD5::unix_md5_crypt($phrase, $phrase_hash)
+        ne $phrase_hash) {
         print STDERR "error: invalid passphrase\n";
         exit;
     }
@@ -125,12 +124,13 @@ sub get_key {
 
     if ( $dupl_user ) {
         my ($id, $pwd) = lookup_login($passwd, $dupl_user);
-        print STDERR qq/error: login with the "$dupl_user" /
-            . "username exists already\n" and exit if $pwd;
+        print STDERR qq/error: login "$dupl_user" /
+            . "exists already\n" and exit if $pwd;
     }
 
     my $phrase = verify_phrase($passwd->{_}->{phrase});
-    my $key = md5_hex($phrase);
+    require Digest::MD5;
+    my $key = Digest::MD5::md5_hex($phrase);
 
     return ($key, $passwd);
 }
@@ -163,7 +163,7 @@ sub new_login {
     my $c = Crypt::Twofish->new($key);
 
     $passwd->{login}->{$user} =
-        encode_base64( $c->encrypt( pack('a16',$pwd) ) );
+        MIME::Base64::encode_base64($c->encrypt(pack('a16',$pwd)));
 
     $passwd->write($PASSWDFILE);
 }
@@ -177,11 +177,8 @@ sub edit_login {
     my ($key, $passwd) = get_key();
     my ($id, $pwd) = lookup_login($passwd, $opts{edit});
 
-    print STDERR qq/error: no such login with the "$opts{edit}" /
-        . "username exists\n" and exit unless $pwd;
-
-    print "WARN: Changing password for the login "
-        . qq/with the username "$id".\n/;
+    print STDERR "error: no such login\n" and exit unless $pwd;
+    print qq/WARN: Changing password for the login "$id".\n/;
 
     new_login($key, $passwd, $id);
 }
@@ -190,11 +187,11 @@ sub get_login {
     my ($key, $passwd) = get_key();
     my ($id, $pwd) = lookup_login($passwd, $opts{get});
 
-    print STDERR qq/error: no such login with the "$opts{get}" /
-        . "username exists\n" and exit unless $pwd;
+    print STDERR "error: no such login\n" and exit unless $pwd;
 
     my $c = Crypt::Twofish->new($key);
-    print "login: " .$opts{get}."=". $c->decrypt(decode_base64($pwd)) ."\n";
+    print "login: " .$opts{get}."="
+        . $c->decrypt(MIME::Base64::decode_base64($pwd)) ."\n";
 }
 
 sub show_logins {
@@ -210,11 +207,10 @@ sub delete_login {
     my ($key, $passwd) = get_key();
     my ($id, $pwd) = lookup_login($passwd, $opts{delete});
 
-    print STDERR qq/error: no such login with the "$opts{delete}" /
-        . "username exists\n" and exit unless $pwd;
+    print STDERR "error: no such login\n" and exit unless $pwd;
 
-    print "WARN: About to delete the login with the username "
-        . qq/"$id".\n/ ."> Confirm delete (y/N): ";
+    print qq/WARN: About to delete the login "$id". /
+        . "Confirm delete (y/N): ";
 
     chomp(my $confirm = <STDIN>);
     exit unless $confirm eq "y";
