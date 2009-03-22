@@ -3,7 +3,7 @@
 ###########################################################################
 # clivefeed, the feed parsing utility for clive
 #
-# Copyright (c) 2008, 2009 Toni Gundogdu <legatvs@gmail.com>
+# Copyright (c) 2008-2009 Toni Gundogdu <legatvs@gmail.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -239,7 +239,7 @@ sub init_gui {
     require Tk::Tree;
     require Tk::DialogBox;
     require HTML::Strip;
-    eval "require Tk::FontDialog";  $opted_mods{FontDialog} = 0 if $@;
+    eval "require Tk::FontDialog"; $opted_mods{FontDialog} = 0 if $@;
 
     $mw = MainWindow->new;
     $mw->geometry($opts{geometry}) if defined $opts{geometry};
