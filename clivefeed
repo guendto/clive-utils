@@ -220,12 +220,21 @@ sub run_clive {
 
 sub print_version {
     my $noexit  = shift;
-    my $s       = sprintf 
-        "clivefeed ".VERSION.". Copyright (c) 2008-2009 Toni Gundogdu.\n"
-      . "clivefeed is licensed under the ISC license which is functionally\n"
-      . "equivalent to the 2-clause BSD licence.\n";
-    return $s if $noexit;
-    print  $s; exit;
+    my $perl_v  = sprintf("--with-perl=%vd-%s",$^V,$^O);
+    my $str     = sprintf("clivefeed %s.  "
+                    . "Copyright (c) 2008-2009 Toni Gundogdu "
+                    . "<legatvs\@gmail.com>.\n",VERSION);
+    $str .= "$perl_v ";
+    my $i = 0;
+    while (my ($key,$value) = each(%opted_mods)) {
+        $str .= sprintf("--with-$key=%s ",$value ? "yes":"no");
+        $str .= "\n"  if (++$i % 2 == 0);
+    }
+    $str .= "clivefeed is licensed under the ISC license which is "
+        . "functionally\nequivalent to the 2-clause BSD licence.\n"
+        . "\tReport bugs to <http://code.google.com/p/clive-utils/issues/>.\n";
+    return $str if $noexit;
+    print  $str; exit;
 }
 
 

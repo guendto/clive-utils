@@ -36,10 +36,10 @@ my $PASSWDFILE  = File::Spec->catfile($CONFIGDIR, "passwd");
 my %opts;
 GetOptions(\%opts,
     'create|c', 'add|a=s',  'get|g=s', 'edit|e=s', 'delete|d=s',
-    'show|s',   'help|h',   'version|v',
+    'show|s',   'help|h',
+    'version|v' => \&print_version,
 ) or exit(1);
 
-print_version() if $opts{version};
 if ($opts{help}) {
     require Pod::Usage;
     Pod::Usage::pod2usage(-exitstatus => 0, -verbose => 1);
@@ -233,12 +233,16 @@ sub lookup_login {
 
 sub print_version {
     my $noexit  = shift;
-    my $s       = sprintf 
-        "clivepass ".VERSION.". Copyright (c) 2008-2009 Toni Gundogdu.\n"
-      . "clivepass is licensed under the ISC license which is functionally\n"
-      . "equivalent to the 2-clause BSD licence.\n";
-    return $s if $noexit;
-    print  $s; exit;
+    my $perl_v  = sprintf("--with-perl=%vd-%s",$^V,$^O);
+    my $str     = sprintf("clivepass %s.  "
+                    . "Copyright (c) 2008-2009 Toni Gundogdu "
+                    . "<legatvs\@gmail.com>.\n",VERSION);
+    $str .= "$perl_v ";
+    $str .= "\nclivepass is licensed under the ISC license which is "
+        . "functionally\nequivalent to the 2-clause BSD licence.\n"
+        . "\tReport bugs to <http://code.google.com/p/clive-utils/issues/>.\n";
+    return $str if $noexit;
+    print  $str; exit;
 }
 
 __END__
