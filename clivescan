@@ -127,7 +127,7 @@ sub fetch_page {
 
 sub get_queue {
     if ( $opts{paste} ) {
-        print STDERR "error: Clipboard module not found" and exit
+        print STDERR "error: Clipboard module not found\n" and exit
             unless $opted_mods{Clipboard};
         my $data = Clipboard->paste();
         if ( $data ) {
