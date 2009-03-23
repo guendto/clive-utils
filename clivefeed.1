@@ -129,7 +129,7 @@
 .\" ========================================================================
 .\"
 .IX Title "clivefeed 1"
-.TH clivefeed 1 "2009-03-22" "2.1.4" "clivefeed manual"
+.TH clivefeed 1 "2009-03-23" "2.1.4" "clivefeed manual"
 .SH "NAME"
 clivefeed \- the feed parsing utility for clive
 .SH "SYNOPSIS"
@@ -138,21 +138,26 @@ clivefeed [option]... [\s-1URL\s0]...
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 clivefeed is an utility that parses \s-1RSS\s0 feeds containing video page links and
-uses \fIclive\fR\|(1) to extract them.
+uses \fIclive\fR\|(1) (or <\fIcclive\fR\|(1)>) to extract them.
 .PP
-Historically, the feed parsing function was part of \fIclive\fR\|(1)
-and it was written in Python/Newt. The clivefeed utility was written
-in Perl/Tk to replace the feature that was removed in clive 2.0. This
-utility is part of the \fBclive-utils\fR project.
+Historically, the feed parsing feature was written in Python/Newt and
+was part of \fIclive\fR\|(1). This feature was originally removed in clive 2.0
+and later rewritten in Perl/Tk as part of the \fBclive-utils\fR project which
+is a set of additional utilities for \fIclive\fR\|(1).
+.SH "OPTION SYNTAX"
+.IX Header "OPTION SYNTAX"
+You may freely mix different option styles, or specify options after the
+command-line arguments. For example:
+  % clivefeed \-c /usr/local/bin/clive \-\-opts=mp4 \s-1URL\s0 \-a
+.PP
+You may also put several options together that do not require arguments.
+For example:
+  % clivefeed \-aXc /usr/local/bin/clive \s-1URL\s0
+.PP
+Which is equivalent to:
+  % clivefeed \-a \-X \-c /usr/local/bin/clive \s-1URL\s0
 .SH "OPTIONS"
 .IX Header "OPTIONS"
-You may freely specify options after the command-line arguments. For example:
-.PP
-.Vb 1
-\&    % clivefeed -a URL --opts=--no-extract
-.Ve
-.PP
-\&\fBBasic Options\fR
 .IP "\fB\-h \-\-help\fR" 4
 .IX Item "-h --help"
 Show help and exit.
@@ -163,7 +168,7 @@ Show version and exit.
 .IX Item "-c --clive=path"
 \&\fIpath\fR to \fIclive\fR\|(1) command. If unspecified, clivefeed will attempt to
 locate it in the \f(CW$PATH\fR. Additionally, the \fB\s-1CLIVE_PATH\s0\fR environment variable
-can be used. See also \*(L"\s-1CONFIG\s0\*(R". 
+can be used.
 .IP "\fB\-o \-\-opts=\fR\fIopts\fR" 4
 .IX Item "-o --opts=opts"
 \&\fIopts\fR to append to clive call. See \fIclive\fR\|(1) for more on the available
@@ -189,30 +194,28 @@ environment variable is defined, it will be used.
 Do not use the defined \s-1HTTP\s0 proxy (\fB\-\-proxy\fR, config or http_proxy).
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
-.ie n .IP "% clivefeed ""http://youtube.com/rss/user/communitychannel/videos.rss""" 4
-.el .IP "% clivefeed ``http://youtube.com/rss/user/communitychannel/videos.rss''" 4
-.IX Item "% clivefeed http://youtube.com/rss/user/communitychannel/videos.rss"
-Parses the feed at the specified \s-1URL\s0.
-.IP "% cat >> url.lst" 4
-.IX Item "% cat >> url.lst"
-.Vb 6
-\& http://youtube.com/rss/user/googletechtalks/videos.rss
-\& http://youtube.com/rss/user/theonion/videos.rss
-\& http://youtube.com/rss/user/lisanova/videos.rss
-\& http://youtube.com/rss/user/clipcritics/videos.rss
-\& http://youtube.com/rss/user/communitychannel/videos.rss
-\& http://youtube.com/rss/user/manintheboxshow/videos.rss
-.Ve
-.IP "% cat url.lst | clivefeed" 4
-.IX Item "% cat url.lst | clivefeed"
-Reads input from \s-1UNIX\s0 pipe.
-.ie n .IP "% clivefeed \-\-opts=""\-f mp4""" 4
-.el .IP "% clivefeed \-\-opts=``\-f mp4''" 4
-.IX Item "% clivefeed --opts=-f mp4"
-Append the \fIopts\fR to the \fIclive\fR\|(1) call.
-.IP "% clivefeed \-\-all \s-1URL\s0" 4
-.IX Item "% clivefeed --all URL"
-Grabs all found videos without prompting.
+.IP "Typical use:" 4
+.IX Item "Typical use:"
+% clivefeed \*(L"http://youtube.com/rss/user/communitychannel/videos.rss\*(R"
+.IP "Multiple feed URLs:" 4
+.IX Item "Multiple feed URLs:"
+% cat >> url.lst
+  http://youtube.com/rss/user/googletechtalks/videos.rss
+  http://youtube.com/rss/user/theonion/videos.rss
+  http://youtube.com/rss/user/lisanova/videos.rss
+  http://youtube.com/rss/user/clipcritics/videos.rss
+  http://youtube.com/rss/user/communitychannel/videos.rss
+  http://youtube.com/rss/user/manintheboxshow/videos.rss
+.Sp
+% cat url.lst | clivefeed
+.IP "Set path to \fIclive\fR\|(1) with video extraction options:" 4
+.IX Item "Set path to clive with video extraction options:"
+% clivefeed \-\-clive=/usr/local/bin/clive \-\-opts=\*(L"\-f mp4\*(R" \s-1URL\s0
+.IP "Grab all found videos without prompting:" 4
+.IX Item "Grab all found videos without prompting:"
+% clivefeed \-\-all \s-1URL\s0
+.Sp
+Note that users without X can also use this.
 .SH "FILES"
 .IX Header "FILES"
 clivefeed searches the ~/.config/clive\-utils directory for the config file.
@@ -223,37 +226,19 @@ Configuration file.
 .IP "~/.config/clive\-utils/feed.prefs" 4
 .IX Item "~/.config/clive-utils/feed.prefs"
 \&\s-1GUI\s0 preferences (e.g. fonts, window position, sash coords, ...).
-.SH "CONFIG"
-.IX Header "CONFIG"
-.Vb 1
-\& ## Example config file for clivefeed.
-.Ve
-.PP
-.Vb 3
-\& [clive]
-\&   path = /usr/local/bin/clive
-\&   opts = -f mp4
-.Ve
-.PP
-.Vb 3
-\& [http]
-\&   agent = Mozilla/5.0
-\&   proxy = http://foo:1234
-.Ve
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIclive\fR\|(1) \fIclivescan\fR\|(1)
+\&\fIclive\fR\|(1) \fIclivescan\fR\|(1) \fIclivepass\fR\|(1)
 .SH "OTHER"
 .IX Header "OTHER"
-Project: http://googlecode.com/p/clive\-utils/
+Project page:
+  <http://googlecode.com/p/clive\-utils/>
 .PP
-A clive-utils development repository can be obtained from:
+Development repository can be cloned with:
+  % git clone git://repo.or.cz/clive\-utils.git
 .PP
-.Vb 1
-\&    % git clone git://repo.or.cz/clive-utils.git
-.Ve
-.PP
-Patches welcome.
+For release announcements, subscribe to the project at:
+  <http://freshmeat.net/projects/clive\-utils/>
 .SH "AUTHOR"
 .IX Header "AUTHOR"
 Written by Toni Gundogdu <legatvs@gmail.com>

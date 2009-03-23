@@ -129,7 +129,7 @@
 .\" ========================================================================
 .\"
 .IX Title "clivepass 1"
-.TH clivepass 1 "2009-02-19" "2.1.4" "clivepass manual"
+.TH clivepass 1 "2009-03-23" "2.1.4" "clivepass manual"
 .SH "NAME"
 clivepass \- the login password utility for clive
 .SH "SYNOPSIS"
@@ -137,16 +137,21 @@ clivepass \- the login password utility for clive
 clivepass [option]...
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
-clivepass is an utility that can be used to create and change passwords
-for websites used by \fIclive\fR\|(1). The passwords are encrypted and saved
-along with the username information. Access is restricted by using a
-global passphrase.
+clivepass is a replacement for stored plain-text website login passwords used
+with \fIclive\fR\|(1). It keeps website login passwords encrypted in a repository
+file that can be accessed with a global passphrase. Typically these login
+passwords are passed in plain-text form to \fIclive\fR\|(1) on command line or
+from a config file.
 .PP
-Historically, a similar utility, clive\-passwd, was part of clive 1.x but
-was written in Python instead of Perl.
+Note that even though the passwords are encrypted on disk, they are passed
+in plain-text over the network. This means the passwords are still visible to
+anyone intercepting the network traffic.
+.PP
+Historically, a similar utility existed as part of clive 1.0 but was removed
+in clive 2.0 and later rewritten in Perl as part of the \fBclive-utils\fR project
+which is a set of additional utilities for \fIclive\fR\|(1).
 .SH "OPTIONS"
 .IX Header "OPTIONS"
-\&\fBBasic Options\fR
 .IP "\fB\-h \-\-help\fR" 4
 .IX Item "-h --help"
 Show help and exit.
@@ -173,12 +178,22 @@ Dump all saved login usernames to stdout.
 Delete \fIusername\fR from passwd file.
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
-.IP "% clivepass \-a myusername" 4
-.IX Item "% clivepass -a myusername"
-.PD 0
-.IP "% clivepass \-g myusername" 4
-.IX Item "% clivepass -g myusername"
-.PD
+.IP "Create new password repository file:" 4
+.IX Item "Create new password repository file:"
+% clivepass \-c
+.ie n .IP "Add ""myusername"" to the repository:" 4
+.el .IP "Add ``myusername'' to the repository:" 4
+.IX Item "Add myusername to the repository:"
+% clivepass \-a myusername
+.Sp
+Note that \*(L"myusername\*(R" should be the login username for the website.
+.ie n .IP "Get login password for ""myusername"":" 4
+.el .IP "Get login password for ``myusername'':" 4
+.IX Item "Get login password for myusername:"
+% clivepass \-g myusername
+.Sp
+There is a more comprehensive example of \fIclive\fR\|(1) using \fIclivepass\fR\|(1)
+in the \fIclive\fR\|(1) manual page.
 .SH "FILES"
 .IX Header "FILES"
 clivepass searches the ~/.config/clive\-utils directory for the config file.
@@ -192,15 +207,14 @@ encrypted passwords.
 \&\fIclive\fR\|(1) \fIclivescan\fR\|(1) \fIclivefeed\fR\|(1)
 .SH "OTHER"
 .IX Header "OTHER"
-Project: http://googlecode.com/p/clive\-utils/
-.Sp
-A clive-utils development repository can be obtained from:
-.Sp
-.Vb 1
-\&    % git clone git://repo.or.cz/clive-utils.git
-.Ve
-.Sp
-Patches welcome.
+Project page:
+  <http://googlecode.com/p/clive\-utils/>
+.PP
+Development repository can be cloned with:
+  % git clone git://repo.or.cz/clive\-utils.git
+.PP
+For release announcements, subscribe to the project at:
+  <http://freshmeat.net/projects/clive\-utils/>
 .SH "AUTHOR"
 .IX Header "AUTHOR"
 Written by Toni Gundogdu <legatvs@gmail.com>

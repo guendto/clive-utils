@@ -9,21 +9,28 @@ clivescan [option]... [URL]...
 =head1 DESCRIPTION
 
 clivescan is an utility that scans video pages for video links and
-uses L<clive(1)> to extract them. The utility scans for video page
-and embedded video links.
+uses L<clive(1)> (or <cclive(1)> to extract them. It scans for both video
+page and embedded video links.
 
-Historically, the video link scanning function was part of L<clive(1)>
-and it was written in Python/Newt. The clivescan utility was written
-in Perl/Tk to replace the feature that was removed in clive 2.0. This
-utility is part of the B<clive-utils> project.
+Historically, the video link scanning feature was written in Python/Newt and
+was part of L<clive(1)>. This feature was originally removed in clive 2.0
+and later rewritten in Perl/Tk as part of the B<clive-utils> project which
+is a set of additional utilities for L<clive(1)>.
+
+=head1 OPTION SYNTAX
+
+You may freely mix different option styles, or specify options after the
+command-line arguments. For example:
+  % clivescan -c /usr/local/bin/clive --opts=mp4 URL -a
+
+You may also put several options together that do not require arguments.
+For example:
+  % clivescan -aXc /usr/local/bin/clive URL
+
+Which is equivalent to:
+  % clivescan -a -X -c /usr/local/bin/clive URL
 
 =head1 OPTIONS
-
-You may freely specify options after the command-line arguments. For example:
-
-    % clivescan -a URL --opts=--noextract
-
-B<Basic Options>
 
 =over 4
 
@@ -39,7 +46,7 @@ Show version and exit.
 
 I<path> to L<clive(1)> command. If unspecified, clivescan will attempt to
 locate it in the $PATH. Additionally, the B<CLIVE_PATH> environment variable
-can be used. See also L</CONFIG>. 
+can be used.
 
 =item B<-o --opts=>I<opts>
 
@@ -55,13 +62,11 @@ this option to workaround the X requirement.
 
 This option provides a workaround for some search pattern issues that
 are known to occur. For example:
-
  % clivescan "http://video.google.com/videosearch?q=inurl%3Abreak"
 
 Does not return any break.com videos even though the page lists them.
 This happens because clivescan assumes that the domain break.com can
 be found in the URL. To override this restrictive default behaviour:
-
  % clivescan -S "http://video.google.com/videosearch?q=inurl%3Abreak"
 
 =item B<-p, --paste>
@@ -93,28 +98,29 @@ Do not use the defined HTTP proxy (B<--proxy>, config or http_proxy).
 
 =over 4
 
-=item % clivescan youtube.com video.google.com
+=item Typical use:
 
-Scans both, Youtube and GoogleVideo front pages for video links.
+% clivescan youtube.com video.google.com
 
-=item % cat E<gt>E<gt> url.lst
+=item Multiple scan URLs:
 
- http://video.google.com
- http://youtube.com/communitychannel
- http://sevenload.com
- http://break.com
+% cat E<gt>E<gt> url.lst
+  http://video.google.com
+  http://youtube.com/communitychannel
+  http://sevenload.com
+  http://break.com
 
-=item % cat url.lst | clivescan
+% cat url.lst | clivescan
 
-Reads input from UNIX pipe.
+=item Set path to L<clive(1)> with video extraction options:
 
-=item % clivescan --opts="-f mp4"
+% clivescan --clive=/usr/local/bin/clive --opts="-f mp4" URL
 
-Appends the I<opts> to the L<clive(1)> call.
+=item Grab all found videos without prompting:
 
-=item % clivescan --all http://youtube.com
+% clivescan --all http://youtube.com
 
-Grabs all found videos from the Youtube front page.
+Note that users without X can also use this.
 
 =back
 
@@ -135,31 +141,20 @@ GUI preferences (e.g. fonts, window position, sash coords, ...).
 
 =back
 
-=head1 CONFIG
-
- ## Example config file for clivescan.
-
- [clive]
-   path = /usr/local/bin/clive
-   opts = -f mp4
-
- [http]
-   agent = Mozilla/5.0
-   proxy = http://foo:1234
-
 =head1 SEE ALSO
 
-L<clive(1)> L<clivefeed(1)>
+L<clive(1)> L<clivefeed(1)> L<clivepass(1)>
 
 =head1 OTHER
 
-Project: http://googlecode.com/p/clive-utils/
+Project page:
+  <http://googlecode.com/p/clive-utils/>
 
-A clive-utils development repository can be obtained from:
+Development repository can be cloned with:
+  % git clone git://repo.or.cz/clive-utils.git
 
-    % git clone git://repo.or.cz/clive-utils.git
-
-Patches welcome.
+For release announcements, subscribe to the project at:
+  <http://freshmeat.net/projects/clive-utils/>
 
 =head1 AUTHOR
 

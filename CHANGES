@@ -9,6 +9,7 @@ Version 2.1.4
   * Update manual pages (all)
     - Generate clivepass.1 from clivepass.pod (see above)
     - Update --all descriptions
+    - Cleanup sections
   * Change warning and error messages (clivepass)
   * Fix Edit / Preferences (clivescan)
     - Menu did not appear even when Tk::FontDialog was installed

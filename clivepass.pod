@@ -8,17 +8,21 @@ clivepass [option]...
 
 =head1 DESCRIPTION
 
-clivepass is an utility that can be used to create and change passwords
-for websites used by L<clive(1)>. The passwords are encrypted and saved
-along with the username information. Access is restricted by using a
-global passphrase.
+clivepass is a replacement for stored plain-text website login passwords used
+with L<clive(1)>. It keeps website login passwords encrypted in a repository
+file that can be accessed with a global passphrase. Typically these login
+passwords are passed in plain-text form to L<clive(1)> on command line or
+from a config file.
 
-Historically, a similar utility, clive-passwd, was part of clive 1.x but
-was written in Python instead of Perl.
+Note that even though the passwords are encrypted on disk, they are passed
+in plain-text over the network. This means the passwords are still visible to
+anyone intercepting the network traffic.
+
+Historically, a similar utility existed as part of clive 1.0 but was removed
+in clive 2.0 and later rewritten in Perl as part of the B<clive-utils> project
+which is a set of additional utilities for L<clive(1)>.
 
 =head1 OPTIONS
-
-B<Basic Options>
 
 =over 4
 
@@ -60,9 +64,22 @@ Delete I<username> from passwd file.
 
 =over 4
 
-=item % clivepass -a myusername
+=item Create new password repository file:
 
-=item % clivepass -g myusername
+% clivepass -c
+
+=item Add "myusername" to the repository:
+
+% clivepass -a myusername
+
+Note that "myusername" should be the login username for the website.
+
+=item Get login password for "myusername":
+
+% clivepass -g myusername
+
+There is a more comprehensive example of L<clive(1)> using L<clivepass(1)>
+in the L<clive(1)> manual page.
 
 =back
 
@@ -78,19 +95,22 @@ You can override this by setting the B<CLIVEPASS_HOME> environment variable.
 Password file. Contains the salted passphrase hash and login usernames and
 encrypted passwords.
 
+=back
+
 =head1 SEE ALSO
 
 L<clive(1)> L<clivescan(1)> L<clivefeed(1)>
 
 =head1 OTHER
 
-Project: http://googlecode.com/p/clive-utils/
+Project page:
+  <http://googlecode.com/p/clive-utils/>
 
-A clive-utils development repository can be obtained from:
+Development repository can be cloned with:
+  % git clone git://repo.or.cz/clive-utils.git
 
-    % git clone git://repo.or.cz/clive-utils.git
-
-Patches welcome.
+For release announcements, subscribe to the project at:
+  <http://freshmeat.net/projects/clive-utils/>
 
 =head1 AUTHOR
 

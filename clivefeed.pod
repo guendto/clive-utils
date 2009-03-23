@@ -9,20 +9,27 @@ clivefeed [option]... [URL]...
 =head1 DESCRIPTION
 
 clivefeed is an utility that parses RSS feeds containing video page links and
-uses L<clive(1)> to extract them.
+uses L<clive(1)> (or <cclive(1)>) to extract them.
 
-Historically, the feed parsing function was part of L<clive(1)>
-and it was written in Python/Newt. The clivefeed utility was written
-in Perl/Tk to replace the feature that was removed in clive 2.0. This
-utility is part of the B<clive-utils> project.
+Historically, the feed parsing feature was written in Python/Newt and
+was part of L<clive(1)>. This feature was originally removed in clive 2.0
+and later rewritten in Perl/Tk as part of the B<clive-utils> project which
+is a set of additional utilities for L<clive(1)>.
+
+=head1 OPTION SYNTAX
+
+You may freely mix different option styles, or specify options after the
+command-line arguments. For example:
+  % clivefeed -c /usr/local/bin/clive --opts=mp4 URL -a
+
+You may also put several options together that do not require arguments.
+For example:
+  % clivefeed -aXc /usr/local/bin/clive URL
+
+Which is equivalent to:
+  % clivefeed -a -X -c /usr/local/bin/clive URL
 
 =head1 OPTIONS
-
-You may freely specify options after the command-line arguments. For example:
-
-    % clivefeed -a URL --opts=--no-extract
-
-B<Basic Options>
 
 =over 4
 
@@ -38,7 +45,7 @@ Show version and exit.
 
 I<path> to L<clive(1)> command. If unspecified, clivefeed will attempt to
 locate it in the $PATH. Additionally, the B<CLIVE_PATH> environment variable
-can be used. See also L</CONFIG>. 
+can be used.
 
 =item B<-o --opts=>I<opts>
 
@@ -79,30 +86,31 @@ Do not use the defined HTTP proxy (B<--proxy>, config or http_proxy).
 
 =over 4
 
-=item % clivefeed "http://youtube.com/rss/user/communitychannel/videos.rss"
+=item Typical use:
 
-Parses the feed at the specified URL.
+% clivefeed "http://youtube.com/rss/user/communitychannel/videos.rss"
 
-=item % cat E<gt>E<gt> url.lst
+=item Multiple feed URLs:
 
- http://youtube.com/rss/user/googletechtalks/videos.rss
- http://youtube.com/rss/user/theonion/videos.rss
- http://youtube.com/rss/user/lisanova/videos.rss
- http://youtube.com/rss/user/clipcritics/videos.rss
- http://youtube.com/rss/user/communitychannel/videos.rss
- http://youtube.com/rss/user/manintheboxshow/videos.rss
+% cat E<gt>E<gt> url.lst
+  http://youtube.com/rss/user/googletechtalks/videos.rss
+  http://youtube.com/rss/user/theonion/videos.rss
+  http://youtube.com/rss/user/lisanova/videos.rss
+  http://youtube.com/rss/user/clipcritics/videos.rss
+  http://youtube.com/rss/user/communitychannel/videos.rss
+  http://youtube.com/rss/user/manintheboxshow/videos.rss
 
-=item % cat url.lst | clivefeed
+% cat url.lst | clivefeed
 
-Reads input from UNIX pipe.
+=item Set path to L<clive(1)> with video extraction options:
 
-=item % clivefeed --opts="-f mp4"
+% clivefeed --clive=/usr/local/bin/clive --opts="-f mp4" URL
 
-Append the I<opts> to the L<clive(1)> call.
+=item Grab all found videos without prompting:
 
-=item % clivefeed --all URL
+% clivefeed --all URL
 
-Grabs all found videos without prompting.
+Note that users without X can also use this.
 
 =back
 
@@ -123,31 +131,20 @@ GUI preferences (e.g. fonts, window position, sash coords, ...).
 
 =back
 
-=head1 CONFIG
-
- ## Example config file for clivefeed.
-
- [clive]
-   path = /usr/local/bin/clive
-   opts = -f mp4
-
- [http]
-   agent = Mozilla/5.0
-   proxy = http://foo:1234
-
 =head1 SEE ALSO
 
-L<clive(1)> L<clivescan(1)>
+L<clive(1)> L<clivescan(1)> L<clivepass(1)>
 
 =head1 OTHER
 
-Project: http://googlecode.com/p/clive-utils/
+Project page:
+  <http://googlecode.com/p/clive-utils/>
 
-A clive-utils development repository can be obtained from:
+Development repository can be cloned with:
+  % git clone git://repo.or.cz/clive-utils.git
 
-    % git clone git://repo.or.cz/clive-utils.git
-
-Patches welcome.
+For release announcements, subscribe to the project at:
+  <http://freshmeat.net/projects/clive-utils/>
 
 =head1 AUTHOR
 
