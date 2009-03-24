@@ -15,6 +15,7 @@ Version 2.1.4
     - Menu did not appear even when Tk::FontDialog was installed
 
  Developer-visible changes:
+  * Cleanup INSTALL file
   * Optimize script start (all)
     - Replace "use $module" with "require $module" where possible
     - Should improve script start time
