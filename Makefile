@@ -21,18 +21,6 @@ TR          = tr
 WITH_MAN    = yes
 WITH_CHECK  = yes
 
-RELEASE_scan := \
-    $(shell sh -c "$(AWK) '/constant VERSION/ {print \$$5}' clivescan | \
-        $(TR) -d '[\";]'")
-
-RELEASE_feed := \
-    $(shell sh -c "$(AWK) '/constant VERSION/ {print \$$5}' clivefeed | \
-        $(TR) -d '[\";]'")
-
-RELEASE_pass := \
-    $(shell sh -c "$(AWK) '/constant VERSION/ {print \$$5}' clivepass | \
-        $(TR) -d '[\";]'")
-
 .PHONY: all checks
 all: checks
 
@@ -53,33 +41,49 @@ else
 endif
 
 .PHONY: install uninstall
+
+SCRIPTS = clivefeed clivescan clivepass
+
 install:
+	# TODO: Merge these two loops
 	$(INSTALL_D) $(DESTDIR)$(bindir)
-	$(INSTALL) clivescan $(DESTDIR)$(bindir)/clivescan
-	$(INSTALL) clivefeed $(DESTDIR)$(bindir)/clivefeed
-	$(INSTALL) clivepass $(DESTDIR)$(bindir)/clivepass
+	@for s in $(SCRIPTS); \
+	do \
+		echo "$(INSTALL) $$s $(DESTDIR)$(bindir)/$$s"; \
+		$(INSTALL) $$s $(DESTDIR)$(bindir)/$$s; \
+	done
 ifeq ($(WITH_MAN),yes)
 	$(INSTALL_D) $(DESTDIR)$(man1dir)
-	$(INSTALL_M) clivescan.1 $(DESTDIR)$(man1dir)/clivescan.1
-	$(INSTALL_M) clivefeed.1 $(DESTDIR)$(man1dir)/clivefeed.1
-	$(INSTALL_M) clivepass.1 $(DESTDIR)$(man1dir)/clivepass.1
+	@for s in $(SCRIPTS); \
+	do \
+		echo "$(INSTALL_M) $$s.1 $(DESTDIR)$(man1dir)/$$s.1"; \
+		$(INSTALL_M) $$s.1 $(DESTDIR)$(man1dir)/$$s.1; \
+	done
 endif
 
 uninstall:
-	$(RM) $(DESTDIR)$(bindir)/clivescan
-	$(RM) $(DESTDIR)$(bindir)/clivefeed
-	$(RM) $(DESTDIR)$(bindir)/clivepass
+	# TODO: Merge these two loops
+	@for s in $(SCRIPTS); \
+	do \
+		echo "$(RM) $(DESTDIR)$(bindir)/$$s"; \
+		$(RM) $(DESTDIR)$(bindir)/$$s; \
+	done
 ifeq ($(WITH_MAN),yes)
-	$(RM) $(DESTDIR)$(man1dir)/clivescan.1
-	$(RM) $(DESTDIR)$(man1dir)/clivefeed.1
-	$(RM) $(DESTDIR)$(man1dir)/clivepass.1
+	@for s in $(SCRIPTS); \
+	do \
+		echo "$(RM) $(DESTDIR)$(man1dir)/$$s.1"; \
+		$(RM) $(DESTDIR)$(man1dir)/$$s.1; \
+	done
 endif
 
-.PHONY: man clean
+.PHONY: man
 man:
-	$(POD2MAN) -c "clivescan manual" -n clivescan \
-		-s 1 -r $(RELEASE_scan) clivescan.pod clivescan.1
-	$(POD2MAN) -c "clivefeed manual" -n clivefeed \
-		-s 1 -r $(RELEASE_feed) clivefeed.pod clivefeed.1
-	$(POD2MAN) -c "clivepass manual" -n clivepass \
-		-s 1 -r $(RELEASE_pass) clivepass.pod clivepass.1
+	@for s in $(SCRIPTS); \
+	do \
+		release=`$(AWK) '/constant VERSION/ {print \$$5}' $$s | \
+			$(TR) -d '["\;]'`; \
+		echo $(POD2MAN) -c "$$s manual" -n $$s \
+			-s 1 -r $$release $$s.pod $$s.1; \
+		$(POD2MAN) -c "$$s manual" -n $$s \
+			-s 1 -r $$release $$s.pod $$s.1; \
+	done
