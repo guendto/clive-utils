@@ -35,11 +35,9 @@
  - Crypt::PasswdMD5
  - Crypt::TwoFish
 
- Optional:
- - Clipboard # --paste
- - Tk::FontDialog # GUI Prefs => change font
-
- The scripts run without the above modules but some features will be disabled.
+ Optionally (some features will be disabled):
+ - Clipboard        # --paste
+ - Tk::FontDialog   # GUI: Edit / Preferences (change font)
 
  Note that you can install these modules from CPAN, typically (as root):
 
@@ -52,12 +50,7 @@
 
  Typical use:
 
-    % clivescan "http://youtube.com"
     % clivefeed "http://youtube.com/rss/user/communitychannel/videos.rss"
+    % clivescan "http://youtube.com"
 
- Be sure to read the manual pages also, e.g.:
-
-    % clivescan --manual
-    % man clivescan
-
- See also the ./configrc file.
+ Be sure to read the manual pages. See also the ./configrc file.
