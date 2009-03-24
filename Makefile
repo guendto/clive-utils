@@ -26,15 +26,24 @@ all: checks
 
 MODULES = \
  Config::Tiny  WWW::Curl  Tk  Tk::Tree  Tk::DialogBox  HTML::TokeParser \
- XML::RSS::LibXML  URI::Escape  HTML::Strip  Crypt::PasswdMD5  Crypt::Twofish
+ XML::RSS::LibXML  URI::Escape  HTML::Strip  Crypt::PasswdMD5  Crypt::Twofish \
+
+MODULES_OPTIONAL = \
+ Clipboard  Tk::FontDialog
 
 checks:
 ifeq ($(WITH_CHECK),yes)
+	@echo == Required Perl modules:
 	@for m in $(MODULES); \
 	do \
-		echo -n "Check for $$m ..."; \
         result=`$(PERL) -M$$m -e "print 'yes'" 2>/dev/null || echo no`;\
-		echo "$$result";\
+		echo "$$m ...$$result"; \
+	done
+	@echo == Optional Perl modules:
+	@for m in $(MODULES_OPTIONAL); \
+	do \
+        result=`$(PERL) -M$$m -e "print 'yes'" 2>/dev/null || echo no`;\
+		echo "$$m ...$$result"; \
 	done
 else
 	@echo Disable module checking.
