@@ -33,7 +33,7 @@
  - URI::Escape
  - HTML::Strip
  - Crypt::PasswdMD5
- - Crypt::TwoFish
+ - Crypt::Twofish
 
  Optionally (some features will be disabled):
  - Clipboard        # --paste
