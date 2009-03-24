@@ -19,6 +19,7 @@ AWK         = awk
 TR          = tr
 
 WITH_MAN    = yes
+WITH_CHECK  = yes
 
 RELEASE_scan := \
     $(shell sh -c "$(AWK) '/constant VERSION/ {print \$$5}' clivescan | \
@@ -32,8 +33,24 @@ RELEASE_pass := \
     $(shell sh -c "$(AWK) '/constant VERSION/ {print \$$5}' clivepass | \
         $(TR) -d '[\";]'")
 
-.PHONY: all
-all:
+.PHONY: all checks
+all: checks
+
+MODULES = \
+ Config::Tiny  WWW::Curl  Tk  Tk::Tree  Tk::DialogBox  HTML::TokeParser \
+ XML::RSS::LibXML  URI::Escape  HTML::Strip  Crypt::PasswdMD5  Crypt::Twofish
+
+checks:
+ifeq ($(WITH_CHECK),yes)
+	@for m in $(MODULES); \
+	do \
+		echo -n "Check for $$m ..."; \
+        result=`$(PERL) -M$$m -e "print 'yes'" 2>/dev/null || echo no`;\
+		echo "$$result";\
+	done
+else
+	@echo Disable module checking.
+endif
 
 .PHONY: install uninstall
 install:
