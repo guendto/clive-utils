@@ -399,7 +399,8 @@ sub find_clive
         );
 
     if ($opts{clive}) { print "$opts{clive}\n" unless $opts{quiet}; }
-    else {
+    else
+    {
         print STDERR "\nerror: not found, use --clive=path\n";
         exit;
     }
@@ -684,7 +685,7 @@ sub on_clear
 sub on_about
 {
     my $dlg = $mw->DialogBox(-title => 'About', -buttons => ['OK']);
-    my $txt = $dlg->add('Text')->pack;
+    my $txt = $dlg->add('Text', -height => 9)->pack;
     $txt->insert('end', print_version(1));
     $dlg->Show;
 }
