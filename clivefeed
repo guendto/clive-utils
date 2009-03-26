@@ -8,7 +8,7 @@
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
 # copyright notice and this permission notice appear in all copies.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 # WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -33,53 +33,57 @@ use Encode;
 
 # Optional mods: note that Tk mods are imported in init_gui
 my %opted_mods = (Clipboard => 1, FontDialog => 1);
-eval "use Clipboard";  $opted_mods{Clipboard} = 0 if $@;
+eval "use Clipboard";
+$opted_mods{Clipboard} = 0 if $@;
 
-my $CONFIGDIR   = $ENV{CLIVEFEED_HOME}
-    || File::Spec->catfile($ENV{HOME}, ".config/clive-utils"); 
-my $CONFIGFILE  = File::Spec->catfile($CONFIGDIR, "config");
-my $PREFSFILE   = File::Spec->catfile($CONFIGDIR, "feed.prefs");
+my $CONFIGDIR = $ENV{CLIVEFEED_HOME}
+  || File::Spec->catfile($ENV{HOME}, ".config/clive-utils");
+my $CONFIGFILE = File::Spec->catfile($CONFIGDIR, "config");
+my $PREFSFILE  = File::Spec->catfile($CONFIGDIR, "feed.prefs");
 
-my %opts;       # options
-my @queue;      # current URL queue
-my $curl;       # curl handle (reused through lifespan)
-my @channels;   # parsed channel data
-my $mw;         # main window handle (GUI)
-my $pwmain;     # handle to the main paned window
-my $pwtop;      # handle to the top paned window
-my $pwbottom;   # handle to the bottom paned window
-my $lbchann;    # listbox: channels
-my $lbitems;    # listbox: (channel) items
-my $lbqueue;    # listbox: queued video items
-my $txtdescr;   # text: video description
-my %usersel;    # user-selected videos
+my %opts;        # options
+my @queue;       # current URL queue
+my $curl;        # curl handle (reused through lifespan)
+my @channels;    # parsed channel data
+my $mw;          # main window handle (GUI)
+my $pwmain;      # handle to the main paned window
+my $pwtop;       # handle to the top paned window
+my $pwbottom;    # handle to the bottom paned window
+my $lbchann;     # listbox: channels
+my $lbitems;     # listbox: (channel) items
+my $lbqueue;     # listbox: queued video items
+my $txtdescr;    # text: video description
+my %usersel;     # user-selected videos
 
 # Parse config
 my $conf  = Config::Tiny->read($CONFIGFILE);
 my $prefs = Config::Tiny->read($PREFSFILE);
 %opts = (
-    clive   => $conf->{clive}->{path},
-    opts    => $conf->{clive}->{opts},
-    agent   => $conf->{http}->{agent},
-    proxy   => $conf->{http}->{proxy},
-    geometry=> $prefs->{gui}->{geometry},
-    pwmain  => $prefs->{gui}->{pwmain},
-    pwtop   => $prefs->{gui}->{pwtop},
-    pwbottom=> $prefs->{gui}->{pwbottom},
-    mainfont=> $prefs->{gui}->{mainfont},
-);
+         clive    => $conf->{clive}->{path},
+         opts     => $conf->{clive}->{opts},
+         agent    => $conf->{http}->{agent},
+         proxy    => $conf->{http}->{proxy},
+         geometry => $prefs->{gui}->{geometry},
+         pwmain   => $prefs->{gui}->{pwmain},
+         pwtop    => $prefs->{gui}->{pwtop},
+         pwbottom => $prefs->{gui}->{pwbottom},
+         mainfont => $prefs->{gui}->{mainfont},
+        );
 
 $opts{mainfont} = $opts{mainfont} || "{helvetica} -12 bold";
 
-GetOptions(\%opts,
-    'debug|d', 'help|h',  'version|v',  'all|a',    'agent|U=s',
-    'paste|p', 'quiet|q', 'clive|c=s',  'opts|o=s', 'proxy|y=s',
+GetOptions(
+    \%opts,
+    'debug|d', 'help|h',  'version|v', 'all|a',    'agent|U=s',
+    'paste|p', 'quiet|q', 'clive|c=s', 'opts|o=s', 'proxy|y=s',
     'version|v' => \&print_version,
+
     # Workaround: longopt|shortopt! not supported
     'no-proxy|X' => sub { $opts{proxy} = ""; },
-) or exit(1);
+          ) or exit(1);
 
-if ($opts{help}) {
+if ($opts{help})
+{
     require Pod::Usage;
     Pod::Usage::pod2usage(-exitstatus => 0, -verbose => 1);
 }
@@ -88,74 +92,86 @@ $opts{clive} = $opts{clive} || $ENV{CLIVE_PATH};
 find_clive() unless $opts{clive};
 
 get_queue();
-select STDERR; $| = 1; # => unbuffered
-select STDOUT; $| = 1;
+select STDERR;
+$| = 1;    # => unbuffered
+select STDOUT;
+$| = 1;
 process_queue();
 
-unless ( $opts{all} ) { init_gui(); } 
-else                  { grab_all(); }
-
+unless ($opts{all}) { init_gui(); }
+else                { grab_all(); }
 
 ## Subroutines: Connection
 
-sub init_curl {
+sub init_curl
+{
     $curl = WWW::Curl::Easy->new;
     $curl->setopt(CURLOPT_USERAGENT, $opts{agent} || "Mozilla/5.0");
     $curl->setopt(CURLOPT_PROXY, $opts{proxy}) if defined $opts{proxy};
     $curl->setopt(CURLOPT_VERBOSE, 1) if $opts{debug};
     $curl->setopt(CURLOPT_FOLLOWLOCATION, 1);
-    $curl->setopt(CURLOPT_AUTOREFERER, 1);
-    $curl->setopt(CURLOPT_HEADER, 0);
-    $curl->setopt(CURLOPT_NOBODY, 0);
+    $curl->setopt(CURLOPT_AUTOREFERER,    1);
+    $curl->setopt(CURLOPT_HEADER,         0);
+    $curl->setopt(CURLOPT_NOBODY,         0);
 }
 
-sub fetch_feed {
+sub fetch_feed
+{
     my ($url, $response, $rc) = (shift, "", 0);
     open my $rfh, ">", \$response;
 
     print "fetch $url ..." unless $opts{quiet};
-    $curl->setopt(CURLOPT_URL, $url);
-    $curl->setopt(CURLOPT_ENCODING, "");
+    $curl->setopt(CURLOPT_URL,       $url);
+    $curl->setopt(CURLOPT_ENCODING,  "");
     $curl->setopt(CURLOPT_WRITEDATA, $rfh);
     $rc = $curl->perform;
     $rc = $curl->getinfo(CURLINFO_RESPONSE_CODE);
 
-    if ( $rc == 200 ) {
+    if ($rc == 200)
+    {
         print "done.\n" unless $opts{quiet};
         process_feed($url, $response);
-    } else {
-        print STDERR "\nerror: " .$curl->strerror($rc)." (http/$rc)\n";
+    }
+    else
+    {
+        print STDERR "\nerror: "
+          . $curl->strerror($rc)
+          . " (http/$rc)\n";
     }
     close $rfh;
 }
 
-
 ## Subroutines: Queue
 
-sub get_queue {
-    if ( $opts{paste} ) {
+sub get_queue
+{
+    if ($opts{paste})
+    {
         print STDERR "error: Clipboard module not found\n" and exit
-            unless $opted_mods{Clipboard};
+          unless $opted_mods{Clipboard};
         my $data = Clipboard->paste();
-        if ( $data ) {
-            parse_input($_) foreach split/\n/,$data;
+        if ($data)
+        {
+            parse_input($_) foreach split /\n/, $data;
         }
     }
 
     parse_input($_) foreach @ARGV;
-    unless ( @queue ) { parse_input($_) while ( <STDIN> ); }
+    unless (@queue) { parse_input($_) while (<STDIN>); }
 
-    my %h = map {$_,1} @queue; # Remove duplicates
+    my %h = map { $_, 1 } @queue;    # Remove duplicates
     @queue = keys %h;
 }
 
-sub process_queue {
+sub process_queue
+{
     init_curl();
     require XML::RSS::LibXML;
     fetch_feed($_) foreach (@queue);
 }
 
-sub process_feed {
+sub process_feed
+{
     my ($url, $response) = @_;
     print "process feed ..." unless $opts{quiet};
 
@@ -166,20 +182,23 @@ sub process_feed {
     print "done.\n" unless $opts{quiet};
 }
 
-sub grab_all {
+sub grab_all
+{
     my @q;
-    foreach my $rss ( @channels ) {
-        foreach my $item ( @{$rss->{items}} ) {
+    foreach my $rss (@channels)
+    {
+        foreach my $item (@{$rss->{items}})
+        {
             push @q, $item->{link};
         }
     }
     run_clive(@q);
 }
 
-
 ## Subroutines: Helpers
 
-sub parse_input {
+sub parse_input
+{
     my $url = shift;
 
     return if $url =~ /^$/;
@@ -189,72 +208,92 @@ sub parse_input {
     push @queue, $url;
 }
 
-sub find_clive {
+sub find_clive
+{
     print "locate clive ..." unless $opts{quiet};
 
     require Cwd;
-    find (
+    find(
         sub {
             $opts{clive} = $File::Find::name
-                if ($_ eq 'clive')
+              if ($_ eq 'clive');
         },
-        split /:/, $ENV{PATH} || Cwd::getcwd
-    );
+        split /:/,
+        $ENV{PATH} || Cwd::getcwd
+        );
 
-    if   ( $opts{clive} ) { print "$opts{clive}\n" unless $opts{quiet}; }
-    else { print STDERR "\nerror: not found, use --clive=path\n"; exit; }
+    if ($opts{clive}) { print "$opts{clive}\n" unless $opts{quiet}; }
+    else {
+        print STDERR "\nerror: not found, use --clive=path\n";
+        exit;
+    }
 }
 
-sub run_clive {
+sub run_clive
+{
     my (@q) = @_;
 
     my $pid = fork;
-    if ($pid < 0) {
+    if ($pid < 0)
+    {
         print STDERR "error: fork failed: $!\n";
         exit(1);
-    } elsif ($pid != 0) {
-        exec "$opts{clive} $opts{opts} " . join(' ',@q)
-            or print STDERR "error: exec failed: $!\n" and exit(1);
+    }
+    elsif ($pid != 0)
+    {
+        exec "$opts{clive} $opts{opts} " . join(' ', @q)
+          or print STDERR "error: exec failed: $!\n" and exit(1);
     }
 }
 
-sub print_version {
-    my $noexit  = shift;
-    my $perl_v  = sprintf("--with-perl=%vd-%s",$^V,$^O);
-    my $str     = sprintf("clivefeed %s.  "
-                    . "Copyright (c) 2008-2009 Toni Gundogdu "
-                    . "<legatvs\@gmail.com>.\n",VERSION);
+sub print_version
+{
+    my $noexit = shift;
+    my $perl_v = sprintf("--with-perl=%vd-%s", $^V, $^O);
+    my $str = sprintf(
+                      "clivefeed %s.  "
+                        . "Copyright (c) 2008-2009 Toni Gundogdu "
+                        . "<legatvs\@gmail.com>.\n",
+                      VERSION
+                     );
     $str .= "$perl_v ";
-    # Has to be done here, otherwise we'll use default hash value.
-    eval "require Tk::FontDialog"; $opted_mods{FontDialog} = 0 if $@;
-    my $i = 0;
-    while (my ($key,$value) = each(%opted_mods)) {
-        $str .= sprintf("--with-$key=%s ",$value ? "yes":"no");
-        $str .= "\n"  if (++$i % 2 == 0);
-    }
-    $str .= "clivefeed is licensed under the ISC license which is "
-        . "functionally\nequivalent to the 2-clause BSD licence.\n"
-        . "\tReport bugs to <http://code.google.com/p/clive-utils/issues/>.\n";
-    return $str if $noexit;
-    print  $str; exit;
-}
 
+    # Has to be done here, otherwise we'll use default hash value.
+    eval "require Tk::FontDialog";
+    $opted_mods{FontDialog} = 0 if $@;
+    my $i = 0;
+    while (my ($key, $value) = each(%opted_mods))
+    {
+        $str .= sprintf("--with-$key=%s ", $value ? "yes" : "no");
+        $str .= "\n" if (++$i % 2 == 0);
+    }
+    $str .=
+        "clivefeed is licensed under the ISC license which is "
+      . "functionally\nequivalent to the 2-clause BSD licence.\n"
+      . "\tReport bugs to <http://code.google.com/p/clive-utils/issues/>.\n";
+    return $str if $noexit;
+    print $str;
+    exit;
+}
 
 # GUI:
 
-sub init_gui {
+sub init_gui
+{
     return unless @channels;
 
     require Tk;
     require Tk::Tree;
     require Tk::DialogBox;
     require HTML::Strip;
-    eval "require Tk::FontDialog"; $opted_mods{FontDialog} = 0 if $@;
+    eval "require Tk::FontDialog";
+    $opted_mods{FontDialog} = 0 if $@;
 
     $mw = MainWindow->new;
     $mw->geometry($opts{geometry}) if defined $opts{geometry};
     $mw->title('clivefeed');
-    $mw->protocol('WM_DELETE_WINDOW', sub { save_prefs(); $mw->destroy } );
+    $mw->protocol('WM_DELETE_WINDOW',
+                  sub { save_prefs(); $mw->destroy });
 
     # Menubar
     my $mb = $mw->Menu;
@@ -262,24 +301,24 @@ sub init_gui {
 
     # Menu: File
     my $file = $mb->cascade(-label => '~File', -tearoff => 0);
-    $file->command(-label => '~Extract videos in queue...',
-         -command =>  \&on_extract);
+    $file->command(-label   => '~Extract videos in queue...',
+                   -command => \&on_extract);
     $file->separator;
-    $file->command(-label => '~Quit',
-        -command => sub { save_prefs(); $mw->destroy } );
+    $file->command(-label   => '~Quit',
+                   -command => sub { save_prefs(); $mw->destroy });
 
     # Menu: Edit
-    if ( $opted_mods{FontDialog} ) {
-        my $edit =
-            $mb->cascade(-label => '~Edit', -tearoff => 0);
-        $edit->command(-label => 'Prefere~nces...',
-             -command => \&on_prefs);
+    if ($opted_mods{FontDialog})
+    {
+        my $edit = $mb->cascade(-label => '~Edit', -tearoff => 0);
+        $edit->command(-label   => 'Prefere~nces...',
+                       -command => \&on_prefs);
     }
 
     # Menu: Help
     my $help = $mb->cascade(-label => '~Help', -tearoff => 0);
-    $help->command(-label => '~About...',
-         -command => \&on_about);
+    $help->command(-label   => '~About...',
+                   -command => \&on_about);
 
     # The GUI has an upper and a lower part
     $pwmain = $mw->Panedwindow(-orient => 'v', -opaqueresize => 0);
@@ -290,74 +329,101 @@ sub init_gui {
     # Upper: Channels
     my $lbar = $pwtop->Frame;
 
-    $lbchann = $lbar->Scrolled('Tree',
-        -scrollbars => 'osoe',
-        -itemtype   => 'text',
-        -selectmode => 'extended',
-        -browsecmd  => \&on_chann,
-        -indicator  => 1,
-        -drawbranch => 1,
-    )->pack(-side => 'top', -expand => 1, -fill => 'both');
+    $lbchann = $lbar->Scrolled(
+                               'Tree',
+                               -scrollbars => 'osoe',
+                               -itemtype   => 'text',
+                               -selectmode => 'extended',
+                               -browsecmd  => \&on_chann,
+                               -indicator  => 1,
+                               -drawbranch => 1,
+                              )->pack(-side => 'top', -expand => 1, -fill => 'both');
 
-    foreach my $rss ( @channels ) {
+    foreach my $rss (@channels)
+    {
         my $chann = $rss->{channel}->{title};
         $chann =~ tr{.}{}d;
 
         $lbchann->add($chann);
-        $lbchann->itemCreate($chann, 0, -text => $chann, -itemtype => 'text');
+        $lbchann->itemCreate(
+                             $chann, 0,
+                             -text     => $chann,
+                             -itemtype => 'text'
+                            );
 
-        foreach my $item ( @{$rss->{items}} ) {
+        foreach my $item (@{$rss->{items}})
+        {
             my $title = $item->{title};
             $title =~ tr{.}{}d;
 
             my $path;
-            for ( my $i=0;; ++$i ) {
+            for (my $i = 0 ; ; ++$i)
+            {
                 $path = "$chann.$title (#$i)";
                 last unless $lbchann->infoExists($path);
             }
 
             $lbchann->add($path, -data => $item);
-            $lbchann->itemCreate($path, 0,
-                -text => $item->{title}, -itemtype => 'text');
+            $lbchann->itemCreate(
+                                 $path, 0,
+                                 -text     => $item->{title},
+                                 -itemtype => 'text'
+                                );
         }
     }
     $lbchann->autosetmode;
-    $lbchann->close($_) foreach ( $lbchann->infoChildren('') );
+    $lbchann->close($_) foreach ($lbchann->infoChildren(''));
 
-    $lbar->Button(-text => 'Grab video', -command => \&on_grab
-    )->pack(-fill => 'x', -side => 'left');
-    $lbar->Button(-text => 'Grab channel', -command => \&on_grab_chann
-    )->pack(-fill => 'x', -side => 'left');
-    $lbar->Button(-text => 'Grab everything', -command => \&on_grab_all
-    )->pack(-fill => 'x', -side => 'left');
+    $lbar->Button(
+                  -text    => 'Grab video',
+                  -command => \&on_grab
+                 )->pack(-fill => 'x', -side => 'left');
+    $lbar->Button(
+                  -text    => 'Grab channel',
+                  -command => \&on_grab_chann
+                 )->pack(-fill => 'x', -side => 'left');
+    $lbar->Button(
+                  -text    => 'Grab everything',
+                  -command => \&on_grab_all
+                 )->pack(-fill => 'x', -side => 'left');
 
     my $rbar = $pwtop->Frame;
-    $txtdescr = $rbar->Scrolled('Text', -scrollbars => 'osoe',
-        )->pack(-fill => 'both', -expand => 1);
+    $txtdescr =
+      $rbar->Scrolled('Text', -scrollbars => 'osoe',)
+      ->pack(-fill => 'both', -expand => 1);
 
-    $pwtop->add($lbar, $rbar, -width => $opts{pwtop} ? $opts{pwtop}:200);
+    $pwtop->add($lbar, $rbar,
+                -width => $opts{pwtop} ? $opts{pwtop} : 200);
 
     # Lower part
-    $pwbottom = $pwmain->Panedwindow(-orient => 'h', -opaqueresize => 0);
+    $pwbottom =
+      $pwmain->Panedwindow(-orient => 'h', -opaqueresize => 0);
 
-    $lbqueue = $pwbottom->Scrolled('Tree',
-        -scrollbars => 'osoe',
-        -itemtype   => 'text',
-        -selectmode => 'extended',
-        -browsecmd  => \&on_queue,
-        -indicator  => 1,
-        -drawbranch => 1,
-    );
+    $lbqueue = $pwbottom->Scrolled(
+                                   'Tree',
+                                   -scrollbars => 'osoe',
+                                   -itemtype   => 'text',
+                                   -selectmode => 'extended',
+                                   -browsecmd  => \&on_queue,
+                                   -indicator  => 1,
+                                   -drawbranch => 1,
+                                  );
 
-    my $bar = $pwbottom->Frame; # Button toorbar
-    $bar->Button(-text => 'Remove', -command=> \&on_remove,
-    )->pack(-fill => 'x');
+    my $bar = $pwbottom->Frame;    # Button toorbar
+    $bar->Button(
+                 -text    => 'Remove',
+                 -command => \&on_remove,
+                )->pack(-fill => 'x');
 
-    $bar->Button(-text => 'Clear', -command=> \&on_clear,
-    )->pack(-fill => 'x');
+    $bar->Button(
+                 -text    => 'Clear',
+                 -command => \&on_clear,
+                )->pack(-fill => 'x');
 
-    $bar->Button(-text => 'Extract videos...', -command=> \&on_extract,
-    )->pack(-fill => 'x', -side => 'bottom');
+    $bar->Button(
+                 -text    => 'Extract videos...',
+                 -command => \&on_extract,
+                )->pack(-fill => 'x', -side => 'bottom');
 
     $pwbottom->add($lbqueue, $bar, -width => $opts{pwbottom} || 200);
 
@@ -365,14 +431,15 @@ sub init_gui {
     $pwmain->add($pwtop, $pwbottom, -height => $opts{pwmain} || 200);
 
     $mw->RefontTree(-font => $opts{mainfont})
-        if $opted_mods{FontDialog};
+      if $opted_mods{FontDialog};
 
     $pwmain->pack(-expand => 1, -fill => 'both');
 
     Tk->MainLoop;
 }
 
-sub set_descr {
+sub set_descr
+{
     my ($lb, $path) = @_;
 
     $txtdescr->delete('1.0', 'end');
@@ -387,133 +454,158 @@ sub set_descr {
     $txtdescr->insert('end', $descr);
 }
 
-sub on_chann {
+sub on_chann
+{
     set_descr($lbchann, shift);
 }
 
-sub on_queue {
+sub on_queue
+{
     set_descr($lbqueue, shift);
 }
 
-sub queue_item {
+sub queue_item
+{
     my $path = shift;
     return if $path !~ /\./;
     return if $lbqueue->infoExists($path);
 
     my $item = $lbchann->infoData($path);
     my ($chann) = split /\./, $path;
-    
-    unless ( $lbqueue->infoExists($chann) ) {
+
+    unless ($lbqueue->infoExists($chann))
+    {
         $lbqueue->add($chann);
-        $lbqueue->itemCreate($chann, 0,
-            -text => $chann, -itemtype => 'text');
+        $lbqueue->itemCreate(
+                             $chann, 0,
+                             -text     => $chann,
+                             -itemtype => 'text'
+                            );
     }
 
     $lbqueue->add($path, -data => $item);
-    $lbqueue->itemCreate($path, 0,
-        -text => $item->{title}, -itemtype => 'text');
+    $lbqueue->itemCreate(
+                         $path, 0,
+                         -text     => $item->{title},
+                         -itemtype => 'text'
+                        );
 }
 
-sub on_grab {
-    queue_item($_) foreach ( $lbchann->infoSelection );
+sub on_grab
+{
+    queue_item($_) foreach ($lbchann->infoSelection);
     $lbqueue->autosetmode;
 }
 
-sub on_grab_chann {
-    foreach ( $lbchann->infoSelection ) {
+sub on_grab_chann
+{
+    foreach ($lbchann->infoSelection)
+    {
         my ($parent) = split /\./;
-        queue_item($_)
-            foreach ( $lbchann->infoChildren($parent) );
-    }        
-    $lbqueue->autosetmode;
-}
-
-sub on_grab_all {
-    foreach ( $lbchann->infoChildren("") ) {
-        my ($parent) = split /\./;
-        queue_item($_)
-            foreach ($lbchann->infoChildren($parent) );
+        queue_item($_) foreach ($lbchann->infoChildren($parent));
     }
     $lbqueue->autosetmode;
 }
 
-sub on_remove {
-    $lbqueue->deleteEntry($_)
-        foreach ( $lbqueue->infoSelection );
+sub on_grab_all
+{
+    foreach ($lbchann->infoChildren(""))
+    {
+        my ($parent) = split /\./;
+        queue_item($_) foreach ($lbchann->infoChildren($parent));
+    }
+    $lbqueue->autosetmode;
 }
 
-sub on_clear {
+sub on_remove
+{
+    $lbqueue->deleteEntry($_) foreach ($lbqueue->infoSelection);
+}
+
+sub on_clear
+{
     $lbqueue->deleteAll;
 }
 
-sub on_about {
+sub on_about
+{
     my $dlg = $mw->DialogBox(-title => 'About', -buttons => ['OK']);
     my $txt = $dlg->add('Text')->pack;
     $txt->insert('end', print_version(1));
     $dlg->Show;
 }
 
-sub change_font {
+sub change_font
+{
     my ($top, $lblv, $lbl) = @_;
     my $font = $top->FontDialog(-initfont => $$lblv)->Show;
 
-    if ( defined $font ) {
+    if (defined $font)
+    {
         my $descr = $top->FontDialog->GetDescriptiveFontName($font);
         $lbl->configure(-font => $descr);
-        $$lblv =  $descr;
+        $$lblv = $descr;
     }
 }
 
-sub on_prefs {
-    my $dlg = $mw->DialogBox(-title => 'clivefeed preferences',
-        -buttons => ['OK','Cancel']);
+sub on_prefs
+{
+    my $dlg = $mw->DialogBox(-title   => 'clivefeed preferences',
+                             -buttons => ['OK', 'Cancel']);
 
-    $dlg->add('Label', -text => 'Fonts: press to choose'
-    )->grid(-sticky => 'w', -pady => 10);
+    $dlg->add('Label', -text => 'Fonts: press to choose')
+      ->grid(-sticky => 'w', -pady => 10);
 
     my ($mainfont) = ($opts{mainfont});
     my $mainfontl = $dlg->Label(-textvariable => \$mainfont);
 
-    $dlg->add('Button', -text => 'Main font',
-        -command => sub { change_font($dlg, \$mainfont, $mainfontl) }
+    $dlg->add(
+           'Button',
+           -text    => 'Main font',
+           -command => sub { change_font($dlg, \$mainfont, $mainfontl) }
     )->grid($mainfontl, -sticky => 'w', -padx => '5');
 
     on_prefs_ok($mainfont) if $dlg->Show eq 'OK';
 }
 
-sub on_prefs_ok {
+sub on_prefs_ok
+{
     ($opts{mainfont}) = @_;
     $mw->RefontTree(-font => $opts{mainfont});
     save_prefs();
 }
 
-sub save_prefs {
+sub save_prefs
+{
     require File::Path;
-    File::Path::mkpath( [$CONFIGDIR], 0, 0700);
+    File::Path::mkpath([$CONFIGDIR], 0, 0700);
 
     my $c = Config::Tiny->new;
     $c->{gui}->{geometry} = $mw->geometry();
 
     # FIXME: +7 is added to the coords even if the sashes have not been
     # dragged. Unsure why. The increase is probably system specific.
-    $c->{gui}->{pwmain}   = ($pwmain->sashCoord(0))[1]-7;
-    $c->{gui}->{pwtop}    = ($pwtop->sashCoord(0))[0]-7;
-    $c->{gui}->{pwbottom} = ($pwbottom->sashCoord(0))[0]-7;
+    $c->{gui}->{pwmain}   = ($pwmain->sashCoord(0))[1] - 7;
+    $c->{gui}->{pwtop}    = ($pwtop->sashCoord(0))[0] - 7;
+    $c->{gui}->{pwbottom} = ($pwbottom->sashCoord(0))[0] - 7;
     $c->{gui}->{mainfont} = $opts{mainfont};
 
     $c->write($PREFSFILE);
 }
 
-sub on_extract {
-    my %re = ( # GVideo has the tendency to wrap everything.
-        UnwrapGVideo => qr|\Qgoogle.com/url?q=\E(.*?)\&|i,
-    );
+sub on_extract
+{
+    my %re = (    # GVideo has the tendency to wrap everything.
+               UnwrapGVideo => qr|\Qgoogle.com/url?q=\E(.*?)\&|i,
+             );
 
     require URI::Escape;
 
     my @q;
-    foreach ( $lbqueue->infoChildren('') ) {
-        foreach ( $lbqueue->infoChildren($_) ) {
+    foreach ($lbqueue->infoChildren(''))
+    {
+        foreach ($lbqueue->infoChildren($_))
+        {
             my $item = $lbqueue->infoData($_);
             my $link = URI::Escape::uri_unescape($item->{link});
             $link = $1 if $link =~ /$re{UnwrapGVideo}/;
@@ -523,28 +615,32 @@ sub on_extract {
     return unless @q;
 
     # Prompt for clive(1) options
-    my $dlg = $mw->DialogBox(-title => 'clive(1) options',
-        -buttons => ['OK','Cancel']);
+    my $dlg = $mw->DialogBox(-title   => 'clive(1) options',
+                             -buttons => ['OK', 'Cancel']);
 
-    $dlg->add('Label', -text => 'Path to clive'
-    )->grid(my $clivepath = $dlg->Entry(-width => 60),
-        -sticky => 'w', -padx => '5');
+    $dlg->add('Label', -text => 'Path to clive')->grid(
+                              my $clivepath = $dlg->Entry(-width => 60),
+                              -sticky => 'w',
+                              -padx   => '5'
+    );
 
-    $dlg->add('Label', -text => 'Runtime options'
-    )->grid(my $cliveopts = $dlg->Entry(-width => 60),
-        -sticky => 'w', -padx => '5');
+    $dlg->add('Label', -text => 'Runtime options')->grid(
+                              my $cliveopts = $dlg->Entry(-width => 60),
+                              -sticky => 'w',
+                              -padx   => '5'
+    );
 
     $clivepath->insert('end', $opts{clive});
     $cliveopts->insert('end', $opts{opts});
 
-    if ( $dlg->Show() eq 'OK' ) {
+    if ($dlg->Show() eq 'OK')
+    {
         $opts{clive} = $clivepath->get;
         $opts{opts}  = $cliveopts->get;
         $mw->destroy;
         run_clive(@q);
     }
 }
-
 
 __END__
 

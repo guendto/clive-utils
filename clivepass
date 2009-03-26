@@ -8,7 +8,7 @@
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
 # copyright notice and this permission notice appear in all copies.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 # WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -29,103 +29,113 @@ use Config::Tiny;
 use File::Spec;
 use Encode;
 
-my $CONFIGDIR   = $ENV{CLIVEPASS_HOME}
-    || File::Spec->catfile($ENV{HOME}, ".config/clive-utils");
-my $PASSWDFILE  = File::Spec->catfile($CONFIGDIR, "passwd");
+my $CONFIGDIR = $ENV{CLIVEPASS_HOME}
+  || File::Spec->catfile($ENV{HOME}, ".config/clive-utils");
+my $PASSWDFILE = File::Spec->catfile($CONFIGDIR, "passwd");
 
 my %opts;
-GetOptions(\%opts,
-    'create|c', 'add|a=s',  'get|g=s', 'edit|e=s', 'delete|d=s',
-    'show|s',   'help|h',
-    'version|v' => \&print_version,
-) or exit(1);
+GetOptions(\%opts, 'create|c', 'add|a=s', 'get|g=s', 'edit|e=s',
+      'delete|d=s', 'show|s', 'help|h', 'version|v' => \&print_version,)
+  or exit(1);
 
-if ($opts{help}) {
+if ($opts{help})
+{
     require Pod::Usage;
     Pod::Usage::pod2usage(-exitstatus => 0, -verbose => 1);
 }
 
 main();
 
-
-sub main {
+sub main
+{
     require File::Path;
     File::Path::mkpath([$CONFIGDIR], 0, 0700);
 
     require Crypt::PasswdMD5;
     require Crypt::Twofish;
     require MIME::Base64;
-    if    ( $opts{add} )    { add_login(); }
-    elsif ( $opts{create} ) { create_passwd(); }
-    elsif ( $opts{edit} )   { edit_login(); }
-    elsif ( $opts{delete} ) { delete_login(); }
-    elsif ( $opts{get} )    { get_login(); }
-    elsif ( $opts{show} )   { show_logins(); }
-    else {
+    if    ($opts{add})    { add_login(); }
+    elsif ($opts{create}) { create_passwd(); }
+    elsif ($opts{edit})   { edit_login(); }
+    elsif ($opts{delete}) { delete_login(); }
+    elsif ($opts{get})    { get_login(); }
+    elsif ($opts{show})   { show_logins(); }
+    else
+    {
         print STDERR "Try --help for more info.\n";
     }
 }
 
-sub salt {
+sub salt
+{
     my $l = shift || 2;
-    return join '', ('.', '/', 0..9, 'A'..'Z', 'a'..'z')
-        [ map{rand 64} (1..$l) ];
+    return join '',
+      ('.', '/', 0 .. 9, 'A' .. 'Z', 'a' .. 'z')
+      [map { rand 64 } (1 .. $l)];
 }
 
-sub create_passwd {
-    if ( -e $PASSWDFILE ) {
+sub create_passwd
+{
+    if (-e $PASSWDFILE)
+    {
         print "WARN: $PASSWDFILE exists already.\n"
-            . "WARN: You are about to overwrite the existing file.\n"
-            . "WARN: Hit ctrl-c now if that's not your intention.\n";
+          . "WARN: You are about to overwrite the existing file.\n"
+          . "WARN: Hit ctrl-c now if that's not your intention.\n";
     }
     print "Creating $PASSWDFILE.\n";
 
     my ($phrase, $again);
-    $phrase = getpass("Enter a new passphrase: ") while ( ! $phrase );
+    $phrase = getpass("Enter a new passphrase: ") while (!$phrase);
     print "WARN: Consider using a longer passphrase.\n"
-        if ( length($phrase) < 8 );
-    $again = getpass("Re-enter the passphrase: ") while ( ! $again );
+      if (length($phrase) < 8);
+    $again = getpass("Re-enter the passphrase: ") while (!$again);
 
     print STDERR "error: passphrases did not match\n" and exit
-        unless $phrase eq $again;
+      unless $phrase eq $again;
 
     my $passwd = Config::Tiny->new;
     $passwd->{_}->{phrase} =
-        Crypt::PasswdMD5::unix_md5_crypt($phrase, salt(8));
+      Crypt::PasswdMD5::unix_md5_crypt($phrase, salt(8));
     $passwd->write($PASSWDFILE);
 
-    return ( passwd => $passwd, phrase => $phrase );
+    return (passwd => $passwd, phrase => $phrase);
 }
 
-sub verify_phrase {
+sub verify_phrase
+{
     my ($phrase_hash) = @_;
 
     print STDERR "error: $PASSWDFILE: phrase hash not found\n" and exit
-        unless $phrase_hash;
+      unless $phrase_hash;
 
     my $phrase;
-    $phrase = getpass("Enter passphrase: ") while ( ! $phrase );
+    $phrase = getpass("Enter passphrase: ") while (!$phrase);
 
-    if (Crypt::PasswdMD5::unix_md5_crypt($phrase, $phrase_hash)
-        ne $phrase_hash) {
+    if (Crypt::PasswdMD5::unix_md5_crypt($phrase, $phrase_hash) ne
+        $phrase_hash)
+    {
         print STDERR "error: invalid passphrase\n";
         exit;
     }
     return $phrase;
 }
 
-sub get_key {
+sub get_key
+{
     my ($dupl_user) = @_;
 
     print STDERR "error: $PASSWDFILE does not exist, use --create\n"
-        and exit if ( ! -e $PASSWDFILE );
+      and exit
+      if (!-e $PASSWDFILE);
 
     my $passwd = Config::Tiny->read($PASSWDFILE);
 
-    if ( $dupl_user ) {
+    if ($dupl_user)
+    {
         my ($id, $pwd) = lookup_login($passwd, $dupl_user);
-        print STDERR qq/error: login "$dupl_user" /
-            . "exists already\n" and exit if $pwd;
+        print STDERR qq/error: login "$dupl_user" / . "exists already\n"
+          and exit
+          if $pwd;
     }
 
     my $phrase = verify_phrase($passwd->{_}->{phrase});
@@ -135,45 +145,50 @@ sub get_key {
     return ($key, $passwd);
 }
 
-
-sub getpass {
-    if ( -t STDOUT ) {
+sub getpass
+{
+    if (-t STDOUT)
+    {
         system "stty -echo";
         print shift;
     }
     chomp(my $passwd = <STDIN>);
 
-    if ( -t STDOUT ) {
+    if (-t STDOUT)
+    {
         print "\n";
         system "stty echo";
     }
     return $passwd;
 }
 
-sub new_login {
+sub new_login
+{
     my ($key, $passwd, $user) = @_;
 
     my ($pwd, $again);
-    $pwd = getpass("Enter password for $user: ") while ( ! $pwd );
-    $again = getpass("Re-enter the password: ") while ( ! $again );
+    $pwd   = getpass("Enter password for $user: ") while (!$pwd);
+    $again = getpass("Re-enter the password: ")    while (!$again);
 
     print STDERR "error: passwords did not match\n" and exit
-        unless $pwd eq $again;
+      unless $pwd eq $again;
 
     my $c = Crypt::Twofish->new($key);
 
     $passwd->{login}->{$user} =
-        MIME::Base64::encode_base64($c->encrypt(pack('a16',$pwd)));
+      MIME::Base64::encode_base64($c->encrypt(pack('a16', $pwd)));
 
     $passwd->write($PASSWDFILE);
 }
 
-sub add_login {
+sub add_login
+{
     my ($key, $passwd) = get_key($opts{add});
     new_login($key, $passwd, $opts{add});
 }
 
-sub edit_login {
+sub edit_login
+{
     my ($key, $passwd) = get_key();
     my ($id, $pwd) = lookup_login($passwd, $opts{edit});
 
@@ -183,34 +198,40 @@ sub edit_login {
     new_login($key, $passwd, $id);
 }
 
-sub get_login {
+sub get_login
+{
     my ($key, $passwd) = get_key();
     my ($id, $pwd) = lookup_login($passwd, $opts{get});
 
     print STDERR "error: no such login\n" and exit unless $pwd;
 
     my $c = Crypt::Twofish->new($key);
-    print "login: " .$opts{get}."="
-        . $c->decrypt(MIME::Base64::decode_base64($pwd)) ."\n";
+    print "login: "
+      . $opts{get} . "="
+      . $c->decrypt(MIME::Base64::decode_base64($pwd)) . "\n";
 }
 
-sub show_logins {
+sub show_logins
+{
     my $passwd = Config::Tiny->read($PASSWDFILE);
-    foreach ( $passwd->{login} ) {
-        while ( my ($id, $pwd) = each(%{$_}) ) {
+    foreach ($passwd->{login})
+    {
+        while (my ($id, $pwd) = each(%{$_}))
+        {
             printf "%20s = %-32s\n", $id, $pwd;
         }
     }
 }
 
-sub delete_login {
+sub delete_login
+{
     my ($key, $passwd) = get_key();
     my ($id, $pwd) = lookup_login($passwd, $opts{delete});
 
     print STDERR "error: no such login\n" and exit unless $pwd;
 
     print qq/WARN: About to delete the login "$id". /
-        . "Confirm delete (y/N): ";
+      . "Confirm delete (y/N): ";
 
     chomp(my $confirm = <STDIN>);
     exit unless $confirm eq "y";
@@ -219,30 +240,40 @@ sub delete_login {
     $passwd->write($PASSWDFILE);
 }
 
-sub lookup_login {
+sub lookup_login
+{
     my ($passwd, $user) = @_;
 
-    foreach ( $passwd->{login} ) {
-        while ( my ($id, $pwd) = each(%{$_}) ) {
-            if ( $id eq $user ) {
-                return ($id,$pwd);
+    foreach ($passwd->{login})
+    {
+        while (my ($id, $pwd) = each(%{$_}))
+        {
+            if ($id eq $user)
+            {
+                return ($id, $pwd);
             }
         }
     }
 }
 
-sub print_version {
-    my $noexit  = shift;
-    my $perl_v  = sprintf("--with-perl=%vd-%s",$^V,$^O);
-    my $str     = sprintf("clivepass %s.  "
-                    . "Copyright (c) 2008-2009 Toni Gundogdu "
-                    . "<legatvs\@gmail.com>.\n",VERSION);
+sub print_version
+{
+    my $noexit = shift;
+    my $perl_v = sprintf("--with-perl=%vd-%s", $^V, $^O);
+    my $str = sprintf(
+                      "clivepass %s.  "
+                        . "Copyright (c) 2008-2009 Toni Gundogdu "
+                        . "<legatvs\@gmail.com>.\n",
+                      VERSION
+                     );
     $str .= "$perl_v ";
-    $str .= "\nclivepass is licensed under the ISC license which is "
-        . "functionally\nequivalent to the 2-clause BSD licence.\n"
-        . "\tReport bugs to <http://code.google.com/p/clive-utils/issues/>.\n";
+    $str .=
+        "\nclivepass is licensed under the ISC license which is "
+      . "functionally\nequivalent to the 2-clause BSD licence.\n"
+      . "\tReport bugs to <http://code.google.com/p/clive-utils/issues/>.\n";
     return $str if $noexit;
-    print  $str; exit;
+    print $str;
+    exit;
 }
 
 __END__
