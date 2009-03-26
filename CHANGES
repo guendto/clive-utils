@@ -1,3 +1,12 @@
+Version 2.1.5
+
+ User-visible changes:
+  * Limit aboutbox height (clivefeed, clivescan)
+
+ Developer-visible changes:
+  * Cleanup code (perltidy -gnu -l=72) [all]
+
+
 Version 2.1.4
 (March 24, 2009)
 
