@@ -4,6 +4,7 @@ Version 2.1.5
   * Limit aboutbox height (clivefeed, clivescan)
 
  Developer-visible changes:
+  * Rename: configrc -> examples/config
   * Cleanup code (perltidy -gnu -l=72) [all]
 
 
