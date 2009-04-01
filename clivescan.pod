@@ -67,7 +67,7 @@ are known to occur. For example:
 Does not return any break.com videos even though the page lists them.
 This happens because clivescan assumes that the domain break.com can
 be found in the URL. To override this restrictive default behaviour:
- % clivescan -S "http://video.google.com/videosearch?q=inurl%3Abreak"
+ % clivescan -n "http://video.google.com/videosearch?q=inurl%3Abreak"
 
 =item B<-p, --paste>
 
