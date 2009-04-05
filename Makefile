@@ -54,7 +54,6 @@ endif
 SCRIPTS = clivefeed clivescan clivepass
 
 install:
-	# TODO: Merge these two loops
 	$(INSTALL_D) $(DESTDIR)$(bindir)
 	@for s in $(SCRIPTS); \
 	do \
