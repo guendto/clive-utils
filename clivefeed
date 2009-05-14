@@ -41,6 +41,7 @@ my $CONFIGDIR = $ENV{CLIVEFEED_HOME}
 my $CONFIGFILE = File::Spec->catfile( $CONFIGDIR, "config" );
 my $PREFSFILE  = File::Spec->catfile( $CONFIGDIR, "feed.prefs" );
 my $RECALLFILE = File::Spec->catfile( $CONFIGDIR, "feed.recall" );
+my $SELECTFILE = File::Spec->catfile( $CONFIGDIR, "feed.sel" );
 
 my %opts;        # options
 my @queue;       # current URL queue
@@ -77,7 +78,7 @@ GetOptions(
     \%opts,
     'debug|d', 'help|h',  'version|v', 'all|a',    'agent|U=s',
     'paste|p', 'quiet|q', 'clive|c=s', 'opts|o=s', 'proxy|y=s',
-    'recall|r',
+    'recall|r','selected|s',
     'version|v' => \&print_version,
 
     # Workaround: longopt|shortopt! not supported
@@ -134,7 +135,7 @@ sub get_queue {
             close $fh;
         }
         else {
-            print STDERR "error: $RECALLFILE: $!", 1;
+            print STDERR "error: $RECALLFILE: $!";
         }
     }
 
@@ -190,17 +191,29 @@ sub main {
     $opts{clive} = $opts{clive} || $ENV{CLIVE_PATH};
     find_clive() unless $opts{clive};
 
-    get_queue();
+    if ( $opts{selected} and -e $SELECTFILE ) {
+        if (open my $fh, "<$SELECTFILE" ) {
+            parse_input($_) while (<$fh>);
+            close $fh;
+            run_clive(@queue);
+        }
+        else {
+            print STDERR "error: $SELECTFILE: $!";
+        }
+    }
+    else {
+        get_queue();
 
-    select STDERR;
-    $| = 1;    # => unbuffered
-    select STDOUT;
-    $| = 1;
+        select STDERR;
+        $| = 1;    # => unbuffered
+        select STDOUT;
+        $| = 1;
 
-    process_queue();
+        process_queue();
 
-    unless ( $opts{all} ) { init_gui(); }
-    else                  { grab_all(); }
+        unless ( $opts{all} ) { init_gui(); }
+        else                  { grab_all(); }
+    }
 }
 
 sub parse_input {
