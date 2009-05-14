@@ -1,3 +1,16 @@
+Version 2.1.6
+
+ User-visible changes:
+  * Add new options: --recall, --selected (feed, scan)
+  * Keep input queue order (feed, scan)
+    - Remove duplicate link checking
+  * Change: --version output
+
+ Developer-visible changes:
+  * Change: use perltidy defaults for style
+  * Change: rewrite stdin reading
+
+
 Version 2.1.5
 (April 4, 2009)
 
