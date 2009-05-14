@@ -89,18 +89,7 @@ if ( $opts{help} ) {
     Pod::Usage::pod2usage( -exitstatus => 0, -verbose => 1 );
 }
 
-$opts{clive} = $opts{clive} || $ENV{CLIVE_PATH};
-find_clive() unless $opts{clive};
-
-get_queue();
-select STDERR;
-$| = 1;    # => unbuffered
-select STDOUT;
-$| = 1;
-process_queue();
-
-unless ( $opts{all} ) { init_gui(); }
-else                  { grab_all(); }
+main();
 
 ## Subroutines: Connection
 
@@ -196,6 +185,23 @@ sub grab_all {
 }
 
 ## Subroutines: Helpers
+
+sub main {
+    $opts{clive} = $opts{clive} || $ENV{CLIVE_PATH};
+    find_clive() unless $opts{clive};
+
+    get_queue();
+
+    select STDERR;
+    $| = 1;    # => unbuffered
+    select STDOUT;
+    $| = 1;
+
+    process_queue();
+
+    unless ( $opts{all} ) { init_gui(); }
+    else                  { grab_all(); }
+}
 
 sub parse_input {
     my $url = shift;
