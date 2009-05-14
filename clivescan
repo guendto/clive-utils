@@ -21,7 +21,7 @@
 use warnings;
 use strict;
 
-use constant VERSION => "2.1.5";
+use constant VERSION => "2.1.6";
 
 binmode(STDOUT, ":utf8");
 use Getopt::Long qw(:config bundling);
