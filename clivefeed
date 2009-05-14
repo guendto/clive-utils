@@ -660,8 +660,8 @@ clivefeed [option]... [URL]...
  -c, --clive=PATH       path to clive(1) command
  -o, --opts=OPTIONS     options passed to clive(1) command
  -a, --all              extract all videos without prompting
- -s, --selected         reuse last selected batch
- -r, --recall           recall last url batch
+ -s, --selected         re-extract last selected video batch
+ -r, --recall           recall last input url batch
  -p, --paste            paste input data from clipboard
  -U, --agent=STRING     identify as STRING to http server
  -y, --proxy=ADDR       use address for http proxy
