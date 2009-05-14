@@ -141,9 +141,6 @@ sub get_queue {
     parse_input($_) foreach @ARGV;
     unless (@queue) { parse_input($_) while (<STDIN>); }
 
-    my %h = map { $_, 1 } @queue;    # Remove duplicates
-    @queue = keys %h;
-
     write_last_file($RECALLFILE, @queue);
 }
 
