@@ -76,9 +76,9 @@ $opts{mainfont} = $opts{mainfont} || "{helvetica} -12 bold";
 
 GetOptions(
     \%opts,
-    'debug|d', 'help|h',  'version|v', 'all|a',    'agent|U=s',
-    'paste|p', 'quiet|q', 'clive|c=s', 'opts|o=s', 'proxy|y=s',
-    'recall|r','selected|s',
+    'debug|d',  'help|h',  'version|v', 'all|a',    'agent|U=s',
+    'paste|p',  'quiet|q', 'clive|c=s', 'opts|o=s', 'proxy|y=s',
+    'recall|r', 'selected|s',
     'version|v' => \&print_version,
 
     # Workaround: longopt|shortopt! not supported
@@ -154,7 +154,7 @@ sub get_queue {
         parse_input($_) while <STDIN>;
     }
 
-    write_last_file($RECALLFILE, @queue);
+    write_last_file( $RECALLFILE, @queue );
 }
 
 sub process_queue {
@@ -191,7 +191,7 @@ sub main {
     find_clive() unless $opts{clive};
 
     if ( $opts{selected} and -e $SELECTFILE ) {
-        if (open my $fh, "<$SELECTFILE" ) {
+        if ( open my $fh, "<$SELECTFILE" ) {
             parse_input($_) while (<$fh>);
             close $fh;
             run_clive(@queue);
@@ -216,7 +216,7 @@ sub main {
 }
 
 sub write_last_file {
-    my ($file, @queue) = @_;
+    my ( $file, @queue ) = @_;
     if ( open my $fh, ">$file" ) {
         print( $fh "$_\n" ) foreach @queue;
         close($fh);
@@ -259,7 +259,7 @@ sub find_clive {
 sub run_clive {
     my (@q) = @_;
 
-    write_last_file($SELECTFILE, @q);
+    write_last_file( $SELECTFILE, @q );
 
     my $pid = fork;
     if ( $pid < 0 ) {
