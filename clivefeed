@@ -147,7 +147,10 @@ sub get_queue {
     }
 
     parse_input($_) foreach @ARGV;
-    unless (@queue) { parse_input($_) while (<STDIN>); }
+
+    if ( scalar(@queue) == 0 && scalar( @ARGV == 0 ) ) {
+        parse_input($_) while <STDIN>;
+    }
 
     my %h = map { $_, 1 } @queue;    # Remove duplicates
     @queue = keys %h;
