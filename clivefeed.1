@@ -132,7 +132,7 @@
 .\" ========================================================================
 .\"
 .IX Title "clivefeed 1"
-.TH clivefeed 1 "2009-03-23" "2.1.5" "clivefeed manual"
+.TH clivefeed 1 "2009-05-14" "2.1.6" "clivefeed manual"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -165,47 +165,53 @@ Which is equivalent to:
   % clivefeed \-a \-X \-c /usr/local/bin/clive \s-1URL\s0
 .SH "OPTIONS"
 .IX Header "OPTIONS"
-.IP "\fB\-h \-\-help\fR" 4
-.IX Item "-h --help"
+.IP "\fB\-h, \-\-help\fR" 4
+.IX Item "-h, --help"
 Show help and exit.
-.IP "\fB\-v \-\-version\fR" 4
-.IX Item "-v --version"
+.IP "\fB\-v, \-\-version\fR" 4
+.IX Item "-v, --version"
 Show version and exit.
-.IP "\fB\-c \-\-clive=\fR\fIpath\fR" 4
-.IX Item "-c --clive=path"
+.IP "\fB\-c, \-\-clive=\fR\fIpath\fR" 4
+.IX Item "-c, --clive=path"
 \&\fIpath\fR to \fIclive\fR\|(1) command. If unspecified, clivefeed will attempt to
 locate it in the \f(CW$PATH\fR. Additionally, the \fB\s-1CLIVE_PATH\s0\fR environment variable
 can be used.
-.IP "\fB\-o \-\-opts=\fR\fIopts\fR" 4
-.IX Item "-o --opts=opts"
+.IP "\fB\-o, \-\-opts=\fR\fIopts\fR" 4
+.IX Item "-o, --opts=opts"
 \&\fIopts\fR to append to clive call. See \fIclive\fR\|(1) for more on the available
 options.
-.IP "\fB\-a \-\-all\fR" 4
-.IX Item "-a --all"
+.IP "\fB\-a, \-\-all\fR" 4
+.IX Item "-a, --all"
 Grab all videos without prompting the \s-1GUI\s0. Note that users without X can use
 this option to workaround the X requirement.
+.IP "\fB\-r, \-\-recall\fR" 4
+.IX Item "-r, --recall"
+Recall the last input link batch.
+.IP "\fB\-s, \-\-selected\fR" 4
+.IX Item "-s, --selected"
+Re-extract the last selected video batch.
 .IP "\fB\-p, \-\-paste\fR" 4
 .IX Item "-p, --paste"
 Paste \s-1URL\s0 input data from clipboard.
 .PP
 \&\fB\s-1HTTP\s0 Options\fR
-.IP "\fB\-U \-\-agent=\fR\fIstring\fR" 4
-.IX Item "-U --agent=string"
+.IP "\fB\-U, \-\-agent=\fR\fIstring\fR" 4
+.IX Item "-U, --agent=string"
 Identify as \fIstring\fR to the \s-1HTTP\s0 server. Defaults to \*(L"Mozilla/5.0\*(R".
-.IP "\fB\-y \-\-proxy=\fR\fIaddress\fR" 4
-.IX Item "-y --proxy=address"
+.IP "\fB\-y, \-\-proxy=\fR\fIaddress\fR" 4
+.IX Item "-y, --proxy=address"
 Use \fIaddress\fR for \s-1HTTP\s0 proxy, e.g. http://foo:1234. If http_proxy
 environment variable is defined, it will be used.
-.IP "\fB\-X \-\-no\-proxy\fR" 4
-.IX Item "-X --no-proxy"
+.IP "\fB\-X, \-\-no\-proxy\fR" 4
+.IX Item "-X, --no-proxy"
 Do not use the defined \s-1HTTP\s0 proxy (\fB\-\-proxy\fR, config or http_proxy).
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 .IP "Typical use:" 4
 .IX Item "Typical use:"
 % clivefeed \*(L"http://youtube.com/rss/user/communitychannel/videos.rss\*(R"
-.IP "Multiple feed URLs:" 4
-.IX Item "Multiple feed URLs:"
+.IP "Multiple links:" 4
+.IX Item "Multiple links:"
 % cat >> url.lst
   http://youtube.com/rss/user/googletechtalks/videos.rss
   http://youtube.com/rss/user/theonion/videos.rss

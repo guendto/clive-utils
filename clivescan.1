@@ -132,7 +132,7 @@
 .\" ========================================================================
 .\"
 .IX Title "clivescan 1"
-.TH clivescan 1 "2009-04-01" "2.1.5" "clivescan manual"
+.TH clivescan 1 "2009-05-14" "2.1.6" "clivescan manual"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -166,27 +166,33 @@ Which is equivalent to:
   % clivescan \-a \-X \-c /usr/local/bin/clive \s-1URL\s0
 .SH "OPTIONS"
 .IX Header "OPTIONS"
-.IP "\fB\-h \-\-help\fR" 4
-.IX Item "-h --help"
+.IP "\fB\-h, \-\-help\fR" 4
+.IX Item "-h, --help"
 Show help and exit.
-.IP "\fB\-v \-\-version\fR" 4
-.IX Item "-v --version"
+.IP "\fB\-v, \-\-version\fR" 4
+.IX Item "-v, --version"
 Show version and exit.
-.IP "\fB\-c \-\-clive=\fR\fIpath\fR" 4
-.IX Item "-c --clive=path"
+.IP "\fB\-c, \-\-clive=\fR\fIpath\fR" 4
+.IX Item "-c, --clive=path"
 \&\fIpath\fR to \fIclive\fR\|(1) command. If unspecified, clivescan will attempt to
 locate it in the \f(CW$PATH\fR. Additionally, the \fB\s-1CLIVE_PATH\s0\fR environment variable
 can be used.
-.IP "\fB\-o \-\-opts=\fR\fIopts\fR" 4
-.IX Item "-o --opts=opts"
+.IP "\fB\-o, \-\-opts=\fR\fIopts\fR" 4
+.IX Item "-o, --opts=opts"
 \&\fIopts\fR to append to clive call. See \fIclive\fR\|(1) for more on the available
 options.
-.IP "\fB\-a \-\-all\fR" 4
-.IX Item "-a --all"
+.IP "\fB\-a, \-\-all\fR" 4
+.IX Item "-a, --all"
 Grab all videos without prompting the \s-1GUI\s0. Note that users without X can use
 this option to workaround the X requirement.
-.IP "\fB\-n \-\-no\-strict\fR" 4
-.IX Item "-n --no-strict"
+.IP "\fB\-r, \-\-recall\fR" 4
+.IX Item "-r, --recall"
+Recall the last input batch.
+.IP "\fB\-s, \-\-selected\fR" 4
+.IX Item "-s, --selected"
+Re-extract the last selected video batch.
+.IP "\fB\-n, \-\-no\-strict\fR" 4
+.IX Item "-n, --no-strict"
 This option provides a workaround for some search pattern issues that
 are known to occur. For example:
  % clivescan \*(L"http://video.google.com/videosearch?q=inurl%3Abreak\*(R"
@@ -200,15 +206,15 @@ be found in the \s-1URL\s0. To override this restrictive default behaviour:
 Paste \s-1URL\s0 input data from clipboard.
 .PP
 \&\fB\s-1HTTP\s0 Options\fR
-.IP "\fB\-U \-\-agent=\fR\fIstring\fR" 4
-.IX Item "-U --agent=string"
+.IP "\fB\-U, \-\-agent=\fR\fIstring\fR" 4
+.IX Item "-U, --agent=string"
 Identify as \fIstring\fR to the \s-1HTTP\s0 server. Defaults to \*(L"Mozilla/5.0\*(R".
-.IP "\fB\-y \-\-proxy=\fR\fIaddress\fR" 4
-.IX Item "-y --proxy=address"
+.IP "\fB\-y, \-\-proxy=\fR\fIaddress\fR" 4
+.IX Item "-y, --proxy=address"
 Use \fIaddress\fR for \s-1HTTP\s0 proxy, e.g. http://foo:1234. If http_proxy
 environment variable is defined, it will be used.
-.IP "\fB\-X \-\-no\-proxy\fR" 4
-.IX Item "-X --no-proxy"
+.IP "\fB\-X, \-\-no\-proxy\fR" 4
+.IX Item "-X, --no-proxy"
 Do not use the defined \s-1HTTP\s0 proxy (\fB\-\-proxy\fR, config or http_proxy).
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
