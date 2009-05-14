@@ -139,7 +139,10 @@ sub get_queue {
     }
 
     parse_input($_) foreach @ARGV;
-    unless (@queue) { parse_input($_) while (<STDIN>); }
+
+    if ( scalar(@queue) == 0 && scalar( @ARGV == 0 ) ) {
+        parse_input($_) while <STDIN>;
+    }
 
     write_last_file($RECALLFILE, @queue);
 }
@@ -769,7 +772,7 @@ clivescan [option]... [URL]...
  -o, --opts=OPTIONS     options passed to clive(1) command
  -a, --all              extract all videos without prompting
  -s, --selected         re-extract last selected video batch
- -r, --recall           recall last input url batch
+ -r, --recall           recall last input batch
  -n, --no-strict        work around host specific search pattern issues
  -p, --paste            paste input data from clipboard
  -U, --agent=STRING     identify as STRING to http server
