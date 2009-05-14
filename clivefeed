@@ -40,6 +40,7 @@ my $CONFIGDIR = $ENV{CLIVEFEED_HOME}
   || File::Spec->catfile( $ENV{HOME}, ".config/clive-utils" );
 my $CONFIGFILE = File::Spec->catfile( $CONFIGDIR, "config" );
 my $PREFSFILE  = File::Spec->catfile( $CONFIGDIR, "feed.prefs" );
+my $RECALLFILE = File::Spec->catfile( $CONFIGDIR, "feed.recall" );
 
 my %opts;        # options
 my @queue;       # current URL queue
@@ -76,6 +77,7 @@ GetOptions(
     \%opts,
     'debug|d', 'help|h',  'version|v', 'all|a',    'agent|U=s',
     'paste|p', 'quiet|q', 'clive|c=s', 'opts|o=s', 'proxy|y=s',
+    'recall|r',
     'version|v' => \&print_version,
 
     # Workaround: longopt|shortopt! not supported
@@ -137,6 +139,16 @@ sub fetch_feed {
 ## Subroutines: Queue
 
 sub get_queue {
+    if ( $opts{recall} and -e $RECALLFILE ) {
+        if ( open my $fh, "<$RECALLFILE" ) {
+            parse_input($_) while (<$fh>);
+            close $fh;
+        }
+        else {
+            print STDERR "error: $RECALLFILE: $!", 1;
+        }
+    }
+
     if ( $opts{paste} ) {
         print STDERR "error: Clipboard module not found\n" and exit
           unless $opted_mods{Clipboard};
@@ -617,6 +629,7 @@ clivefeed [option]... [URL]...
  -c, --clive=PATH       path to clive(1) command
  -o, --opts=OPTIONS     options passed to clive(1) command
  -a, --all              extract all videos without prompting
+ -r, --recall           recall last url batch
  -p, --paste            paste input data from clipboard
  -U, --agent=STRING     identify as STRING to http server
  -y, --proxy=ADDR       use address for http proxy
