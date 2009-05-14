@@ -22,7 +22,7 @@
 
             clive-utils prerequisites
 
- - Perl >= 5.8
+ - Perl 5.8+
  - Config::Tiny
  - WWW::Curl (4.05+)
  - Tk 
@@ -35,7 +35,7 @@
  - Crypt::PasswdMD5
  - Crypt::Twofish
 
- Optionally (some features will be disabled):
+ Optional (some features will be disabled without them):
  - Clipboard        # --paste
  - Tk::FontDialog   # GUI: Edit / Preferences (change font)
 
@@ -43,7 +43,7 @@
 
    # cpan install $modulename
 
- Although many distros have made them available as packages.
+ Although many distros have made the above modules available as packages.
 
 
             Getting started with clive utilities
