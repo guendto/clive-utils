@@ -135,7 +135,7 @@ sub get_queue {
             close $fh;
         }
         else {
-            print STDERR "error: $RECALLFILE: $!";
+            print STDERR "error: $RECALLFILE: $!\n";
         }
     }
 
@@ -156,6 +156,8 @@ sub get_queue {
 
     my %h = map { $_, 1 } @queue;    # Remove duplicates
     @queue = keys %h;
+
+    write_last_file($RECALLFILE, @queue);
 }
 
 sub process_queue {
@@ -198,7 +200,7 @@ sub main {
             run_clive(@queue);
         }
         else {
-            print STDERR "error: $SELECTFILE: $!";
+            print STDERR "error: $SELECTFILE: $!\n";
         }
     }
     else {
@@ -213,6 +215,17 @@ sub main {
 
         unless ( $opts{all} ) { init_gui(); }
         else                  { grab_all(); }
+    }
+}
+
+sub write_last_file {
+    my ($file, @queue) = @_;
+    if ( open my $fh, ">$file" ) {
+        print( $fh "$_\n" ) foreach @queue;
+        close($fh);
+    }
+    else {
+        print STDERR "error: $file: $!\n";
     }
 }
 
@@ -248,6 +261,8 @@ sub find_clive {
 
 sub run_clive {
     my (@q) = @_;
+
+    write_last_file($SELECTFILE, @q);
 
     my $pid = fork;
     if ( $pid < 0 ) {
@@ -648,6 +663,7 @@ clivefeed [option]... [URL]...
  -c, --clive=PATH       path to clive(1) command
  -o, --opts=OPTIONS     options passed to clive(1) command
  -a, --all              extract all videos without prompting
+ -s, --selected         reuse last selected batch
  -r, --recall           recall last url batch
  -p, --paste            paste input data from clipboard
  -U, --agent=STRING     identify as STRING to http server
