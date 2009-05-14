@@ -237,7 +237,6 @@ sub print_version {
     );
     $str .= "$perl_v ";
 
-    # Has to be done here, otherwise we'll use default hash value.
     eval "require Tk::FontDialog";
     $opted_mods{FontDialog} = 0 if $@;
     my $i = 0;
