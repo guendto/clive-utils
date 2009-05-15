@@ -282,7 +282,7 @@ sub print_version {
           . "<legatvs\@gmail.com>.\n\n",
         VERSION, $^O );
 
-    $str .= "$perl_v\n";
+    $str .= "\t$perl_v\n\t";
 
     eval "require Tk::FontDialog";
     $opted_mods{FontDialog} = 0 if $@;
