@@ -59,11 +59,11 @@ this option to workaround the X requirement.
 
 =item B<-r, --recall>
 
-Recall the last input link batch.
+Recall the last input.
 
 =item B<-s, --selected>
 
-Re-extract the last selected video batch.
+Re-extract the last video selection.
 
 =item B<-p, --paste>
 
@@ -136,6 +136,14 @@ Configuration file.
 =item ~/.config/clive-utils/feed.prefs
 
 GUI preferences (e.g. fonts, window position, sash coords, ...).
+
+=item ~/.config/clive-utils/feed.recall
+
+Last input.
+
+=item ~/.config/clive-utils/feed.sel
+
+Last video selection.
 
 =back
 

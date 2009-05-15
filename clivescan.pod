@@ -60,11 +60,11 @@ this option to workaround the X requirement.
 
 =item B<-r, --recall>
 
-Recall the last input batch.
+Recall the last input.
 
 =item B<-s, --selected>
 
-Re-extract the last selected video batch.
+Re-extract the last video selection.
 
 =item B<-n, --no-strict>
 
@@ -146,6 +146,14 @@ Configuration file.
 =item ~/.config/clive-utils/scan.prefs
 
 GUI preferences (e.g. fonts, window position, sash coords, ...).
+
+=item ~/.config/clive-utils/scan.recall
+
+Last input.
+
+=item ~/.config/clive-utils/scan.sel
+
+Last video selection.
 
 =back
 
