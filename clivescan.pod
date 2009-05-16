@@ -9,7 +9,7 @@ clivescan [option]... [URL]...
 =head1 DESCRIPTION
 
 clivescan is an utility that scans video pages for video links and
-uses L<clive(1)> (or <cclive(1)> to extract them. It scans for both video
+uses L<clive(1)> (or <cclive(1)>) to extract them. It scans for both video
 page and embedded video links.
 
 Historically, the video link scanning feature was written in Python/Newt and
