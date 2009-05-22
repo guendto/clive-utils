@@ -1,4 +1,7 @@
 
+* rewrite scan
+* implement connect timeout (+socks)
+
 Someday maybe
 -------------
  * clivescan: Add support for Break.com embedded URLs (see src for notes)
