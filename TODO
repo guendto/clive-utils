@@ -1,5 +1,8 @@
 
-* rewrite scan
+* clivescan scan logic needs rewriting
+  ** tests/scan/nostrict.url fails
+  ** tests/scan/youtube-playlist.url fails
+  ** try against other tests/scan/*
 * implement connect timeout (+socks)
 
 Someday maybe
