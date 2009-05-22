@@ -4,7 +4,7 @@ Version 2.1.7
   * Add: support for youtube-nocookie.com (scan)
 
  Developer-visible changes:
-  * Add: tests/scan/nocookies.url
+  * Add: tests/scan/nocookie.url
 
 
 Version 2.1.6
