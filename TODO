@@ -1,9 +1,13 @@
-
+* modularize
+* replace gnu makefile with ExtUtils::MakeMaker
 * clivescan scan logic needs rewriting
   ** tests/scan/nostrict.url fails
   ** tests/scan/youtube-playlist.url fails
   ** try against other tests/scan/*
+* go over prerequisites
 * implement connect timeout (+socks)
+* clivepass has no purpose as youtube login features have been removed
+  - withold from dist or remove completely
 
 Someday maybe
 -------------
